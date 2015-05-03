@@ -1,0 +1,30 @@
+@import 'normalize';
+@import 'variables';
+@import 'mixins';
+
+*,
+*:before,
+*:after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 14px;
+  line-height: 1.2rem;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  cursor: default;
+}
+
+body {
+  border-top: 1px solid #cfcfcf;
+}
+
+@import 'app-layout';
+@import 'sidebar';
+@import 'channel';
+

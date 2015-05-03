@@ -1,0 +1,10 @@
+#!/bin/sh
+
+# break on errors
+set -e
+
+./scripts/validate-js
+
+sass --update --style=compressed src/client/sass:src/client/css
+
+/Applications/Electron.app/Contents/MacOS/Electron .

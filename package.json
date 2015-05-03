@@ -1,0 +1,29 @@
+{
+  "name": "backchat",
+  "productName": "Backchat",
+  "version": "0.0.1",
+  "description": "A hackable IRC app",
+  "main": "./src/server/main.js",
+  "author": "Zarino Zappia",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zarino/backchat.git"
+  },
+  "bugs": {
+    "url": "https://github.com/zarino/backchat/issues"
+  },
+  "private": true,
+  "dependencies": {
+    "irc": "~0.3.11",
+    "underscore-plus": "^1.6.1"
+  },
+  "devDependencies": {
+    "acorn": "^1.0.3",
+    "mocha": "~1.18.0",
+    "selenium-webdriver": "~2.45.1"
+  },
+  "scripts": {
+    "test": "mocha test",
+    "start": "scripts/start"
+  }
+}

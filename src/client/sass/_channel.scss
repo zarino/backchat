@@ -1,0 +1,86 @@
+.channel {
+  display: none;
+
+  &.active {
+    display: flex;
+  }
+}
+
+.channel__scrollback {
+  background: #fff;
+  overflow: auto;
+}
+
+.channel__scrollback__inner {
+  padding: 0 1em 1em 1em;
+}
+
+.channel__footer {
+  display: flex; // so that children stretch to full width
+  padding: 1em;
+  background: linear-gradient(#e6e6e6, #cfcfcf);
+
+  input {
+    flex: 1 0 auto;
+    padding: 0.5em 0.5em 0.4em;
+    border-radius: 0.2em;
+    border: none;
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1), 0 -1px 0 #fff;
+    background-color: #fbfbfb;
+
+    &:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(89, 169, 249, 0.7);
+      background-color: #fff;
+    }
+  }
+}
+
+.channel__users {
+  padding: 0.8em 0;
+  background: #f6f6f6;
+  border-left: 1px solid #d9d9d9;
+  overflow: auto;
+
+  @include no-select();
+
+  ul {
+    @include list-unstyled;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.2);
+  }
+
+  button {
+    @include button-unstyled;
+    display: block;
+    padding: 0.2em 3em 0.2em 1em;
+
+    &:focus {
+      background-color: #015cdc;
+      color: #fff;
+    }
+  }
+}
+
+.channel__message,
+.channel__action,
+.channel__stage-direction {
+  margin: 1em 0 0 0;
+}
+
+.channel__stage-direction {
+  border-top: 1px solid #eee;
+  border-bottom: 1px solid #eee;
+  padding: 0.8em 0;
+  text-align: center;
+  color: #999;
+
+  & + & {
+    margin-top: 0;
+    border-top: none;
+  }
+
+  &:first-child {
+    padding-top: 0;
+    border-top: none;
+  }
+}

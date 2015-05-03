@@ -1,0 +1,50 @@
+[
+  {
+    "label": "<%= productName %>",
+    "submenu": [
+      { "label": "About <%= productName %>", "selector": "orderFrontStandardAboutPanel:" },
+      { "type": "separator" },
+      { "label": "Preferences…", "command": "application:show-settings", "accelerator": "Command+," },
+      { "type": "separator" },
+      { "label": "Services", "submenu": [] },
+      { "type": "separator" },
+      { "label": "Hide <%= productName %>", "selector": "hide:", "accelerator": "Command+H" },
+      { "label": "Hide Others", "selector": "hideOtherApplications:", "accelerator": "Command+Shift+H" },
+      { "label": "Show All", "selector": "unhideAllApplications:" },
+      { "type": "separator" },
+      { "label": "Quit", "command": "application:quit", "accelerator": "Command+Q" }
+    ]
+  },
+  {
+    "label": "Edit",
+    "submenu": [
+      { "label": "Undo", "selector": "undo:", "accelerator": "Command+Z" },
+      { "label": "Redo", "selector": "redo:", "accelerator": "Shift+Command+Z" },
+      { "type": "separator" },
+      { "label": "Cut", "selector": "cut:", "accelerator": "Command+X" },
+      { "label": "Copy", "selector": "copy:", "accelerator": "Command+C" },
+      { "label": "Paste", "selector": "paste:", "accelerator": "Command+V" },
+      { "label": "Select All", "selector": "selectAll:", "accelerator": "Command+A" }
+    ]
+  },
+  {
+    "label": "View",
+    "submenu": [
+      { "label": "Reload", "command": "window:reload", "accelerator": "Command+R" },
+      { "label": "Show Developer Tools", "command": "window:toggle-dev-tools", "accelerator": "Alt+Command+I" }
+    ]
+  },
+  {
+    "label": "Window",
+    "submenu": [
+      { "label": "Minimize", "selector": "performMiniaturize:", "accelerator": "Command+M" },
+      { "label": "Zoom", "selector": "performZoom:" }
+    ]
+  },
+  {
+    "label": "Help",
+    "submenu": [
+      { "label": "Report Issue", "command": "application:report-issue" }
+    ]
+  }
+]

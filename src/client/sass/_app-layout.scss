@@ -1,0 +1,60 @@
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden; // Disable elastic scrolling when children are scrolled to top
+}
+
+.app {
+  display: flex;
+  height: 100%;
+}
+
+.app-sidebar {
+  flex: 0 0 auto;
+  height: 100%;
+}
+
+.app-content {
+  flex: 1 0 0px;
+  height: 100%;
+}
+
+.channel {
+  display: flex;
+  height: 100%;
+}
+
+.channel__content {
+  flex: 1 0 0px;
+  height: 100%;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.channel__users {
+  flex: 0 0 auto;
+  height: 100%;
+}
+
+.channel__scrollback {
+  flex: 1 0 0px;
+  overflow: auto;
+}
+
+.channel__footer {
+  flex: 0 0 auto;
+}
+
+@media(max-width: 400px){
+  .app-sidebar {
+    display: none;
+  }
+}
+
+@media(max-width: 500px){
+  .channel__users {
+    display: none;
+  }
+}

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Backchat</title>
+    <link rel="stylesheet" href="css/client.css">
+    <script>
+      window.$ = require('./vendor/js/jquery-2.1.3.min.js');
+    </script>
+    <script src="vendor/js/underscore-1.8.3.min.js"></script>
+    <script src="vendor/js/backbone-1.1.2.min.js"></script>
+    <script src="js/client.js"></script>
+  </head>
+  <body>
+
+    <script type="text/html" id="app-view">
+      <div class="app-sidebar">
+        <nav class="channel-list"></nav>
+      </div>
+      <div class="app-content"></div>
+    </script>
+
+    <script type="text/html" id="channel">
+      <div class="channel__content">
+        <div class="channel__scrollback">
+          <div class="channel__scrollback__inner"></div>
+        </div>
+        <div class="channel__footer">
+          <input class="channel__input" type="text" placeholder="Send a message…">
+        </div>
+      </div>
+      <div class="channel__users"></div>
+    </script>
+
+  </body>
+</html>

@@ -1,0 +1,68 @@
+.app-sidebar {
+  border-right: 1px solid $color-mac-sidebar-border;
+  background-color: $color-mac-sidebar-background;
+  color: $color-mac-sidebar-heading;
+  overflow: auto;
+
+  @include no-select();
+}
+
+.channel-list {
+  padding-top: 1em;
+  padding-bottom: 1em;
+
+  h1 {
+    position: relative;
+    padding: 0 4em 0 1em;
+    font-size: inherit;
+    margin: 1em 0 0.4em 0;
+    font-weight: normal;
+    margin-bottom: 0.4em;
+
+    &:first-child {
+      margin-top: 0;
+    }
+
+    &.disconnected {
+      color: mix($color-mac-sidebar-heading, $color-mac-sidebar-background, 50%);
+    }
+
+    &.loading {
+      &:after {
+        display: block;
+        height: 16px;
+        width: 16px;
+        content: "";
+        background: transparent url(../img/sidebar-spinner.svg) 0 0 no-repeat;
+        background-size: 16px 16px;
+        position: absolute;
+        top: 50%;
+        right: 1em;
+        margin-top: -9px;
+      }
+    }
+  }
+
+  button {
+    @include button-unstyled();
+    padding: 0.4em 4em 0.4em 2em;
+    color: $color-mac-sidebar-link;
+
+    &.active {
+      background-color: $color-mac-sidebar-selected;
+    }
+
+    &:focus {
+      background-color: $color-mac-sidebar-focussed;
+      color: #fff;
+    }
+
+    &.unjoined {
+      color: mix($color-mac-sidebar-heading, $color-mac-sidebar-background, 50%);
+
+      &:focus {
+        color: rgba(255,255,255,0.5);
+      }
+    }
+  }
+}
