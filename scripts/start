@@ -4,7 +4,6 @@
 set -e
 
 ./scripts/validate-js
-
-sass --update --style=compressed src/client/sass:src/client/css
+./scripts/compile-css
 
 /Applications/Electron.app/Contents/MacOS/Electron .

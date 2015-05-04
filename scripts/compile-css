@@ -1,0 +1,3 @@
+#!/bin/sh
+
+sass --update --style=compressed src/client/sass:src/client/css
