@@ -1,0 +1,11 @@
+{
+  "name": "backchat",
+  "productName": "Backchat",
+  "version": "0.0.1",
+  "main": "./server/main.js",
+  "private": true,
+  "dependencies": {
+    "irc": "~0.3.11",
+    "underscore-plus": "^1.6.1"
+  }
+}

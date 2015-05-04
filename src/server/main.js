@@ -9,7 +9,7 @@ var Menu = require('menu');
 var MenuItem = require('menu-item');
 var BrowserWindow = require('browser-window');
 
-var pkgJson = require('../../package.json');
+var pkgJson = require('../package.json');
 var AppMenu = require('./app-menu');
 var ConnectionPool = require('./connection-pool');
 

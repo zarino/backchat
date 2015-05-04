@@ -6,4 +6,4 @@ set -e
 ./scripts/validate-js
 ./scripts/compile-css
 
-/Applications/Electron.app/Contents/MacOS/Electron .
+electron .

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 for filename in src/client/js/*.js; do
-  if acorn --silent $filename; then
+  if node_modules/.bin/acorn --silent $filename; then
     true
   else
     echo "^ Error in ${filename}"
@@ -10,11 +10,10 @@ for filename in src/client/js/*.js; do
 done
 
 for filename in src/server/*.js; do
-  if acorn --silent $filename; then
+  if node_modules/.bin/acorn --silent $filename; then
     true
   else
     echo "^ Error in ${filename}"
     exit 1
   fi
 done
-

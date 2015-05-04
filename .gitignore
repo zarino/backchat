@@ -2,3 +2,4 @@ src/client/css
 build
 node_modules
 .sass-cache
+*.app
