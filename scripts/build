@@ -1,0 +1,55 @@
+#!/usr/bin/env node
+
+var spawn = require('child_process').spawn;
+
+var Promise = require('promise');
+var packager = require('electron-packager');
+var pkgJson = require('../package.json');
+
+var run = function run(cmd, args, options){
+  return new Promise(function(fulfill, reject){
+    var child = spawn(cmd, args, options);
+    var resp = '';
+    child.stdout.on('data', function(buffer){
+      resp += buffer.toString();
+    });
+    child.stderr.on('data', function(buffer){
+      resp += buffer.toString();
+    });
+    child.on('close', function(code){
+      if(resp.trim()){
+        console.log(resp.trim());
+      }
+      if(code != 0){
+        process.exit(code);
+      } else {
+        fulfill();
+      }
+    });
+  });
+}
+
+Promise.all([
+  run('npm', ['install', '--no-optional'], { cwd: 'src' }),
+  run('./scripts/validate-js'),
+  run('./scripts/compile-css'),
+  run('rm', ['-rf', './Backchat.app'])
+]).then(function(){
+
+  var args = {
+    'dir': 'src',
+    'name': pkgJson.productName,
+    'app-version': pkgJson.version,
+    'ignore': ['README.md']
+  };
+
+  packager(args, function done(err, appPath){
+    if(err){
+      console.error(err)
+      process.exit(1)
+    }
+
+    console.log('Wrote new app to', appPath)
+  });
+
+});
