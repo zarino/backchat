@@ -21,6 +21,7 @@
     "acorn": "^1.0.3",
     "electron-packager": "^3.1.0",
     "electron-prebuilt": "^0.25.2",
+    "ircdjs": "0.0.17",
     "mocha": "~1.18.0",
     "promise": "^7.0.1",
     "selenium-webdriver": "~2.45.1"

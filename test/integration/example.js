@@ -1,22 +1,11 @@
-var webdriver = require('selenium-webdriver');
 var assert = require('assert');
-
-var createBrowser = function createBrowser(){
-  return new webdriver.Builder()
-    .usingServer('http://localhost:9515')
-    .withCapabilities({
-      chromeOptions: {
-        binary: 'Backchat.app/Contents/MacOS/Electron'
-      }
-    })
-    .forBrowser('electron')
-    .build();
-}
+var helper = require('../integration-helper.js');
 
 describe('Testing the browser window', function(){
 
   before(function(){
-    this.browser = createBrowser();
+    helper.startServer();
+    this.browser = helper.createBrowser();
     // Return a promise that only completes
     // once the window has been created.
     return this.browser.getWindowHandle();
