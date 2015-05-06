@@ -16,6 +16,12 @@ var ConnectionPool = require('./connection-pool');
 var mainWindow = null;
 var pool = new ConnectionPool();
 
+var DEBUG = process.env.hasOwnProperty('BACKCHAT_DEBUG');
+
+if(DEBUG){
+  console.log('** Running Backchat in DEBUG mode **');
+}
+
 app.on('ready', function() {
 
   var menu = new AppMenu({pkgJson: pkgJson});
@@ -33,7 +39,7 @@ app.on('ready', function() {
     width: 800,
     height: 600
   });
-  mainWindow.openDevTools({ detach: true });
+  // mainWindow.openDevTools({ detach: true });
   mainWindow.loadUrl('file://' + __dirname + '/../client/index.html');
   mainWindow.on('closed', function() {
     mainWindow = null;

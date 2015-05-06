@@ -26,7 +26,7 @@
     "selenium-webdriver": "~2.45.1"
   },
   "scripts": {
-    "test": "mocha test",
+    "test": "scripts/build && mocha test",
     "start": "scripts/start",
     "build": "scripts/build"
   }

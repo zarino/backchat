@@ -1,27 +1,44 @@
-var assert = require("assert");
-var webdriver = require("selenium-webdriver");
-  
-var driver = new webdriver.Builder()
-  .usingServer('http://127.0.0.1:4444/wd/hub')
-  .withCapabilities({
-    chromeOptions: {
-      binary: '/Applications/Electron.app/Contents/MacOS/Electron'
-    }
-  })
-  .forBrowser('electron')
-  .build();
+var webdriver = require('selenium-webdriver');
+var assert = require('assert');
 
-describe('Example tests', function(){
+var createBrowser = function createBrowser(){
+  return new webdriver.Builder()
+    .usingServer('http://localhost:9515')
+    .withCapabilities({
+      chromeOptions: {
+        binary: 'Backchat.app/Contents/MacOS/Electron'
+      }
+    })
+    .forBrowser('electron')
+    .build();
+}
 
-  it('Testing a thing on the page', function(done){
-    driver.getTitle().then(function(title) {
-      console.log('Page title is:', title);
-      assert.equal('irc.app', title);
+describe('Testing the browser window', function(){
+
+  before(function(){
+    this.browser = createBrowser();
+    // Return a promise that only completes
+    // once the window has been created.
+    return this.browser.getWindowHandle();
+  });
+
+  it('contains “Backchat”', function(done){
+    this.browser.getTitle().then(function(title) {
+      assert.equal('Backchat', title);
       done();
-     }, function(arg){
-       console.log('failure', arg);
-       done('failure');
-     });
+    }, function(arg){
+      done(arg);
+    });
+  });
+
+  it('contains .app-sidebar and .app-content elements', function(done){
+    this.browser.findElement({css: '.app-sidebar + .app-content'}).then(function(){
+      done()
+    })
+  });
+
+  after(function(){
+    this.browser.quit();
   });
 
 });
