@@ -31,7 +31,7 @@ brew install chromedriver
 Then start a Chromedriver instance for the tests to connect to:
 
 ```
-./scripts/chromedriver
+npm run chromedriver
 ```
 
 And in a new window, run the tests:

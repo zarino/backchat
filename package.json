@@ -27,6 +27,7 @@
   },
   "scripts": {
     "test": "scripts/build && mocha test",
+    "chromedriver": "scripts/chromedriver",
     "start": "scripts/start",
     "build": "scripts/build"
   }
