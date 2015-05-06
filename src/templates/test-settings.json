@@ -1,0 +1,14 @@
+{
+  "servers": [
+    {
+      "name": "Freenode",
+      "url": "irc.freenode.net",
+      "port": 6667,
+      "nick": "backchat",
+      "userName": "backchat",
+      "realName": "Backchat",
+      "autoConnect": true,
+      "channels": [ "#bots" ]
+    }
+  ]
+}

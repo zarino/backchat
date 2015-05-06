@@ -103,19 +103,24 @@ pool.on('irc:registering', function(e){
 });
 
 var getSettings = function getSettings(cb){
+
+  // Running in test mode, so use the test settings and return early
+  if(DEBUG){
+    var defaultSettingsObject = require('../templates/test-settings.json');
+    return cb(defaultSettingsObject);
+  }
+
+  // Running normally, so check for existing user settings
   var settingsFile = path.join(app.getPath('appData'), pkgJson.name, 'settings.json');
   fs.readFile(settingsFile, 'utf8', function(err, settingsStream) {
-    if(err){
-      var defaultSettingsObject = require('../templates/default-settings.json');
-      fs.writeFile(settingsFile, JSON.stringify(defaultSettingsObject), function(err){
-        if(err){
-          throw err;
-        }
-        cb(defaultSettingsObject);
-      });
-    } else {
+    if(settingsStream){
       var settingsObject = JSON.parse(settingsStream.toString());
       cb(settingsObject);
+    } else {
+      // No user settings, so use the default settings
+      // :TODO: Remove this once Backchat has a UI for editing settings
+      var defaultSettingsObject = require('../templates/default-settings.json');
+      cb(defaultSettingsObject);
     }
   });
 }
