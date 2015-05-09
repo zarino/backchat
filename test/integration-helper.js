@@ -1,10 +1,11 @@
 var webdriver = require('selenium-webdriver');
-var Server = require('ircdjs').Server;
+var ircd = require('ircdjs');
 
 module.exports = {
 
   startServer: function(){
-    var server = new Server();
+    ircd.winston.remove(ircd.winston.transports.Console);
+    var server = new ircd.Server();
     server.config = {
       network:  "ircn",
       hostname: "localhost",
