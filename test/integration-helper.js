@@ -15,12 +15,13 @@ module.exports = {
       idleTimeout: 60,
       opers: {},
       channels: {
-        channel1: { topic: "Welcome to Channel 1" },
-        channel2: { topic: "Second Channel" }
+        '#channel1': { topic: "Welcome to Channel 1" },
+        '#channel2': { topic: "Second Channel" }
       }
     }
     server.start();
     server.createDefaultChannels();
+    return server;
   },
 
   createBrowser: function(){
