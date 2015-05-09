@@ -1,5 +1,9 @@
+var chromedriver = require('chromedriver');
 var webdriver = require('selenium-webdriver');
 var ircd = require('ircdjs');
+
+// Selenium webdriver methods here:
+// http://selenium.googlecode.com/git/docs/api/javascript/class_webdriver_WebElement.html
 
 module.exports = {
 
@@ -35,6 +39,8 @@ module.exports = {
       })
       .forBrowser('electron')
       .build();
-  }
+  },
+
+  chromedriver: chromedriver
 
 }

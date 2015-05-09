@@ -19,6 +19,7 @@
   },
   "devDependencies": {
     "acorn": "^1.0.3",
+    "chromedriver": "^2.15.0",
     "electron-packager": "^3.1.0",
     "electron-prebuilt": "^0.25.2",
     "ircdjs": "git://github.com/zarino/ircd.js#dd142ce",
@@ -27,8 +28,7 @@
     "selenium-webdriver": "~2.45.1"
   },
   "scripts": {
-    "test": "scripts/build && mocha test",
-    "chromedriver": "scripts/chromedriver",
+    "test": "scripts/build && BACKCHAT_DEBUG=True mocha test",
     "start": "scripts/start",
     "build": "scripts/build"
   }

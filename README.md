@@ -21,23 +21,15 @@ npm run build
 
 ## Running the tests
 
-There are very limited integration tests. Make sure to set up your environment before starting:
+There are very limited integration tests. They use [selenium-webdriver](https://www.npmjs.com/package/selenium-webdriver) and [chromedriver](https://github.com/giggio/node-chromedriver), along with [mocha](http://mochajs.org) as a test runner – all of which are included as dev dependencies in `package.json`.
+
+To run the tests:
 
 ```
 npm install
-brew install chromedriver
-```
-
-Then start a Chromedriver instance for the tests to connect to:
-
-```
-npm run chromedriver
-```
-
-And in a new window, run the tests:
-
-```
 npm test
 ```
 
-`./scripts/chromedriver` sets the `BACKCHAT_DEBUG` environment variable, which causes `server/main.js` to load test fixtures rather than real user data, and to output more detailed console logs.
+Since the tests must be run on a compiled version of the Electron app, `npm test` first builds the app, and then runs the tests on it. Just like `npm run build`, it checks for javascript syntax errors before compiling.
+
+While running `mocha`, `npm test` sets the `BACKCHAT_DEBUG` environment variable, which causes `server/main.js` to load test fixtures rather than real user data, and to output more detailed console logs.

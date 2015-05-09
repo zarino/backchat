@@ -4,6 +4,7 @@ var helper = require('../integration-helper.js');
 describe('Testing the browser window', function(){
 
   before(function(){
+    helper.chromedriver.start();
     this.server = helper.startServer();
     this.browser = helper.createBrowser();
     // Return a promise that only completes
@@ -48,6 +49,7 @@ describe('Testing the browser window', function(){
 
   after(function(){
     this.browser.quit();
+    helper.chromedriver.stop();
   });
 
 });
