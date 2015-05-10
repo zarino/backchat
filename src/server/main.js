@@ -65,7 +65,26 @@ ipc.on('client:ready', function(){
 
 }).on('client:sendMessage', function(e, args){
   console.log('client:sendMessage', JSON.stringify(args, null, 2));
-  pool.getConnection(args.serverUrl).say(args.toUserOrChannel, args.messageText);
+
+  var messageWords = args.messageText.split(' ');
+  var messageWithoutFirstWord = _.rest(messageWords, 1).join(' ');
+  if (messageWords[0].toLowerCase() == '/me'){
+    pool.getConnection(args.serverUrl).action(
+      args.toUserOrChannel,
+      messageWithoutFirstWord
+    );
+  } else if(messageWords[0].toLowerCase() == '/away'){
+    if(messageWords.length == 1){
+      pool.getConnection(args.serverUrl).send(['AWAY']);
+    } else {
+      pool.getConnection(args.serverUrl).send(['AWAY', messageWithoutFirstWord]);
+    }
+  } else {
+    pool.getConnection(args.serverUrl).say(
+      args.toUserOrChannel,
+      args.messageText
+    );
+  }
 
 });
 

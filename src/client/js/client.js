@@ -341,7 +341,7 @@ window.ChannelView = window.BackchatView.extend({
   addAction: function(fromUser, actionText){
     $('<p>')
       .addClass('channel__action')
-      .html('<b>' + fromuser + '</b> ' + actionText)
+      .html('<b>' + fromUser + '</b> ' + actionText)
       .appendTo(this.$('.channel__scrollback__inner'));
   },
 
