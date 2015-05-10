@@ -152,12 +152,16 @@ module.exports = ConnectionPool = (function(){
     }).addListener('channellist', function(){
       console.log('[irc event]', '[channellist]');
     });
-    self.connections[connectionSettings.serverUrl] = client;
+    self.connections[connectionSettings.url] = client;
   };
 
-  ConnectionPool.prototype.listConnections = function(){
-    return this.connections; // probably don't want to just hand over the whole variable here
-  };
+  ConnectionPool.prototype.getConnection = function(serverUrl){
+    if(serverUrl in this.connections){
+      return this.connections[serverUrl];
+    } else {
+      throw new Error('That server is not currently connected.');
+    }
+  }
 
   return ConnectionPool;
 

@@ -62,6 +62,11 @@ ipc.on('client:ready', function(){
       pool.addConnection(serverSettings);
     });
   });
+
+}).on('client:sendMessage', function(e, args){
+  console.log('client:sendMessage', JSON.stringify(args, null, 2));
+  pool.getConnection(args.serverUrl).say(args.toUserOrChannel, args.messageText);
+
 });
 
 pool.on('irc:registering', function(e){

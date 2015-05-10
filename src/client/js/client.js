@@ -284,9 +284,12 @@ window.ChannelView = window.BackchatView.extend({
     'keypress .channel__input': function(e){
       var $input = $(e.currentTarget);
       if(e.keyCode == 13 && !e.altKey){
-        // send message!
-        console.log('user wants to send message: ' + $input.val());
-        $input.empty();
+        ipc.send('client:sendMessage', {
+          serverUrl: this.options.serverUrl,
+          toUserOrChannel: this.options.channelName,
+          messageText: $input.val()
+        });
+        $input.val(''); // clear the input
       }
     }
   },
