@@ -75,9 +75,9 @@ ipc.on('client:ready', function(){
     );
   } else if(messageWords[0].toLowerCase() == '/away'){
     if(messageWords.length == 1){
-      pool.getConnection(args.serverUrl).send(['AWAY']);
+      pool.getConnection(args.serverUrl).send('AWAY');
     } else {
-      pool.getConnection(args.serverUrl).send(['AWAY', messageWithoutFirstWord]);
+      pool.getConnection(args.serverUrl).send('AWAY', messageWithoutFirstWord);
     }
   } else {
     pool.getConnection(args.serverUrl).say(
