@@ -1,5 +1,6 @@
 var assert = require('assert');
 var helper = require('../integration-helper.js');
+var wd = require('../wadsworth.js')
 
 describe('Testing the browser window', function(){
 
@@ -7,6 +8,7 @@ describe('Testing the browser window', function(){
     helper.chromedriver.start();
     this.server = helper.startServer();
     this.browser = helper.createBrowser();
+    wd.browser = this.browser;
     // Return a promise that only completes
     // once the window has been created.
     return this.browser.getWindowHandle();
@@ -22,13 +24,13 @@ describe('Testing the browser window', function(){
   });
 
   it('Window has a sidebar and content', function(done){
-    this.browser.isElementPresent({css: '.app-sidebar + .app-content'}).then(function(){
-      done()
+    wd.getElement('.app-sidebar + .app-content', function(){
+      done();
     })
   });
 
   it('Sidebar contains connected server name', function(done){
-    this.browser.findElements({css: '.app-sidebar .channel-list h1'}).then(function(elements){
+    wd.getElements('.app-sidebar .channel-list h1', function(elements){
       assert.equal(elements.length, 1);
       elements[0].getText().then(function(text){
         assert.equal(text, 'localhost');
@@ -38,13 +40,47 @@ describe('Testing the browser window', function(){
   });
 
   it('Sidebar contains connected channel name', function(done){
-    this.browser.findElements({css: '.channel-list button'}).then(function(elements){
+    wd.getElements('.channel-list button', function(elements){
       assert.equal(elements.length, 1);
       elements[0].getText().then(function(text){
         assert.equal(text, '#channel1');
         done();
       });
     });
+  });
+
+  describe('Clicking a channel in the sidebar', function(){
+
+    before(function(done){
+      self = this;
+      wd.getElements('.channel-list button', function(elements){
+        self.channelButton = elements[0];
+        self.channelButton.click().then(function(){
+          done();
+        });
+      });
+    });
+
+    it('Reveals the channel in the main window', function(done){
+      wd.getVisible('.channel', function(){
+        done();
+      });
+    });
+
+    it('Shows users in that channel', function(done){
+      wd.getVisible('.channel__users button', function(){
+        done();
+      });
+    });
+
+    it('Shows the channel as selected in the sidebar', function(done){
+      wd.hasClass(this.channelButton, 'active', function(hasClass){
+        if(hasClass){
+          done();
+        }
+      });
+    });
+
   });
 
   after(function(){
