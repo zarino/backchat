@@ -145,12 +145,20 @@ module.exports = ConnectionPool = (function(){
         actionText: text,
         myNick: client.nick
       });
+    }).addListener('whois', function(info){
+      // console.log('[irc event]', '[whois]', info);
+      self.emit('irc:whois', {
+        server: connectionSettings.url,
+        info: info
+      });
     }).addListener('channellist_start', function(){
       console.log('[irc event]', '[channellist_start]');
     }).addListener('channellist_item', function(){
       console.log('[irc event]', '[channellist_item]');
     }).addListener('channellist', function(){
       console.log('[irc event]', '[channellist]');
+    }).addListener('raw', function(message){
+      console.log('[irc event]', '[raw]', message);
     });
     self.connections[connectionSettings.url] = client;
   };

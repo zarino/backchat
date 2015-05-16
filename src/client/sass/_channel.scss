@@ -63,7 +63,8 @@
 
 .channel__message,
 .channel__action,
-.channel__stage-direction {
+.channel__stage-direction,
+.channel__server-message {
   margin: 1em 0 0 0;
 }
 
@@ -82,5 +83,16 @@
   &:first-child {
     padding-top: 0;
     border-top: none;
+  }
+}
+
+.channel__server-message {
+  pre {
+    margin: 0;
+    padding: 0.8em 1em;
+    font-family: Consolas, Monaco, "Lucida Console", monospace;
+    border-radius: 0.2em;
+    background: $color-mac-sidebar-background;
+    border: 1px solid $color-mac-sidebar-border;
   }
 }

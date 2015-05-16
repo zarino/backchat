@@ -103,6 +103,9 @@ window.AppView = window.BackchatView.extend({
       this.addChannelButton(e.server, e.channel);
       this.addChannelView(e.server, e.channel)
         .addStageDirection({ topic: e.topic });
+    },
+    'server:whois': function(e){
+      window.activeChannel.addServerMessage(JSON.stringify(e.info, null, 2));
     }
   },
 
@@ -356,6 +359,13 @@ window.ChannelView = window.BackchatView.extend({
     $('<p>')
       .addClass('channel__stage-direction')
       .html(html)
+      .appendTo(this.$('.channel__scrollback__inner'));
+  },
+
+  addServerMessage: function(messageText){
+    $('<div>')
+      .addClass('channel__server-message')
+      .html('<pre>' + messageText + '</pre>')
       .appendTo(this.$('.channel__scrollback__inner'));
   }
 });

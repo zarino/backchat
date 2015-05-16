@@ -66,19 +66,37 @@ ipc.on('client:ready', function(){
 }).on('client:sendMessage', function(e, args){
   console.log('client:sendMessage', JSON.stringify(args, null, 2));
 
-  var messageWords = args.messageText.split(' ');
-  var messageWithoutFirstWord = _.rest(messageWords, 1).join(' ');
-  if (messageWords[0].toLowerCase() == '/me'){
-    pool.getConnection(args.serverUrl).action(
-      args.toUserOrChannel,
-      messageWithoutFirstWord
-    );
-  } else if(messageWords[0].toLowerCase() == '/away'){
-    if(messageWords.length == 1){
-      pool.getConnection(args.serverUrl).send('AWAY');
+  // User wants to send an IRC command like /me, /away, or /whois
+  if(args.messageText.indexOf('/') == 0){
+    var messageWords = args.messageText.split(' ');
+    var messageCommand = messageWords[0].toLowerCase();
+    var messageWithoutFirstWord = _.rest(messageWords, 1).join(' ');
+
+    // ME
+    if (messageCommand == '/me'){
+      pool.getConnection(args.serverUrl).action(
+        args.toUserOrChannel,
+        messageWithoutFirstWord
+      );
+
+    // AWAY and AWAY <msg>
+    } else if(messageCommand == '/away'){
+      if(messageWords.length == 1){
+        pool.getConnection(args.serverUrl).send('AWAY');
+      } else {
+        pool.getConnection(args.serverUrl).send('AWAY', messageWithoutFirstWord);
+      }
+
+    // Something else, just try your best
     } else {
-      pool.getConnection(args.serverUrl).send('AWAY', messageWithoutFirstWord);
+      var ircCommand = messageCommand.replace('/', '').toUpperCase();
+      pool.getConnection(args.serverUrl).send(
+        ircCommand,
+        messageWithoutFirstWord
+      );
     }
+
+  // No slash, so it must be just a normal message
   } else {
     pool.getConnection(args.serverUrl).say(
       args.toUserOrChannel,
@@ -130,6 +148,10 @@ pool.on('irc:registering', function(e){
 }).on('irc:changedNick', function(e){
   console.log('nick:changed', JSON.stringify(e, null, 2));
   mainWindow.webContents.send('nick:changed', e);
+
+}).on('irc:whois', function(e){
+  console.log('server:whois', JSON.stringify(e, null, 2));
+  mainWindow.webContents.send('server:whois', e);
 
 });
 
