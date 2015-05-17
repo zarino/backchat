@@ -70,6 +70,9 @@ window.AppView = window.BackchatView.extend({
       this.addServerButton(e.server);
       this.addChannelButton(e.server, e.channel);
       var v = this.addChannelView(e.server, e.channel);
+      if(!window.activeChannel){
+        v.focus();
+      }
       v.addStageDirection({ userJoined: e.user });
       v.addUserButton(e.user);
     },
@@ -217,7 +220,6 @@ window.ChannelButtonView = window.BackchatView.extend({
     'click': function(){
       var id = this.options.serverUrl + ' ' + this.options.channelName;
       window.app.channelViews[id].focus();
-      this.$el.addClass('active').siblings().removeClass('active');
     }
   },
 
@@ -304,6 +306,10 @@ window.ChannelView = window.BackchatView.extend({
 
   focus: function(){
     this.$el.addClass('active').siblings().removeClass('active');
+
+    var id = this.options.serverUrl + ' ' + this.options.channelName;
+    window.app.channelButtonViews[id].$el.addClass('active').siblings().removeClass('active');
+
     this.$('.channel__input').focus();
     window.activeChannel = this;
   },
