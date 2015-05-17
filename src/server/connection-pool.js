@@ -53,7 +53,9 @@ module.exports = ConnectionPool = (function(){
       self.emit('irc:names', {
         server: connectionSettings.url,
         channel: channel,
-        users: Object.keys(nicks)
+        users: Object.keys(nicks).sort(function(a, b){
+          return a.localeCompare(b, 'en', { sensitivity: 'base' });
+        })
       });
     }).addListener('topic', function(channel, topic, nick, message){
       // console.log('[irc event]', '[topic]', channel, topic, nick);

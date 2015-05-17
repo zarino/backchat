@@ -75,6 +75,7 @@ window.AppView = window.BackchatView.extend({
       }
       v.addStageDirection({ userJoined: e.user });
       v.addUserButton(e.user);
+      v.sortUserButtons();
     },
     'channel:parted': function(e){
       this.addServerButton(e.server);
@@ -321,6 +322,7 @@ window.ChannelView = window.BackchatView.extend({
     _.each(users, function(user){
       self.addUserButton(user);
     });
+    self.sortUserButtons();
   },
 
   addUserButton: function(nick){
@@ -343,6 +345,16 @@ window.ChannelView = window.BackchatView.extend({
       this.userButtonViews[nick].remove();
       delete this.userButtonViews[nick];
     }
+  },
+
+  sortUserButtons: function(){
+    var $userButtonList = this.$('.channel__users');
+    var $userButtons = $userButtonList.children('button');
+    $userButtons.sort(function(a, b){
+      // a and b are DOM elements, inside the $userButtons jQuery wrapper
+      return a.textContent.localeCompare(b.textContent, 'en', { sensitivity: 'base' });
+    });
+    $userButtons.detach().appendTo($userButtonList);
   },
 
   addMessage: function(fromUser, messageText){
