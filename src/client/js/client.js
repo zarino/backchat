@@ -273,8 +273,18 @@ window.UserButtonView = window.BackchatView.extend({
     return this.$el;
   },
 
+  events: {
+    'dblclick': function(){
+      window.app.addServerButton(this.options.serverUrl);
+      window.app.addChannelButton(this.options.serverUrl, this.options.nick);
+      var v = window.app.addChannelView(this.options.serverUrl, this.options.nick);
+      v.focus();
+    }
+  },
+
   ipcEvents: {
     'nick:changed': function(details){
+      this.options.nick = details.newNick;
       this.$el.text(details.newNick);
     }
   }
