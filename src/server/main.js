@@ -136,17 +136,30 @@ pool.on('irc:registering', function(e){
 
 }).on('irc:message', function(e){
   console.log('message:sent', JSON.stringify(e, null, 2));
+  var eventType = 'message:sent';
+
   // Annoyingly, it seems sometimes IRC actions come through as messages.
   // We can detect them by checking the content of the message.
   if(e.messageText.indexOf('\u0001ACTION') == 0){
     e.actionText = e.messageText.replace(/^\u0001ACTION\s*(.+)\u0001$/, '$1');
-    mainWindow.webContents.send('action:sent', e);
-  } else {
-    mainWindow.webContents.send('message:sent', e);
+    eventType = 'action:sent';
   }
+
+  // Swap the "channel name" round if this is an incoming direct message.
+  if(e.toUserOrChannel == e.myNick){
+    e.toUserOrChannel = e.fromUser;
+  }
+
+  mainWindow.webContents.send(eventType, e);
 
 }).on('irc:action', function(e){
   console.log('action:sent', JSON.stringify(e, null, 2));
+
+  // Swap the "channel name" round if this is an incoming direct message.
+  if(e.toUserOrChannel == e.myNick){
+    e.toUserOrChannel = e.fromUser;
+  }
+
   mainWindow.webContents.send('action:sent', e);
 
 }).on('irc:changedNick', function(e){
