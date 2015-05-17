@@ -114,6 +114,10 @@ pool.on('irc:registering', function(e){
   console.log('server:connected', JSON.stringify(e, null, 2));
   mainWindow.webContents.send('server:connected', e);
 
+}).on('irc:joining', function(e){
+  console.log('channel:joining', JSON.stringify(e, null, 2));
+  mainWindow.webContents.send('channel:joining', e);
+
 }).on('irc:join', function(e){
   console.log('channel:joined', JSON.stringify(e, null, 2));
   mainWindow.webContents.send('channel:joined', e);

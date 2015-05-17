@@ -29,8 +29,7 @@ module.exports = ConnectionPool = (function(){
         port: connectionSettings.port,
         userName: connectionSettings.userName,
         realName: connectionSettings.realName,
-        autoConnect: connectionSettings.autoConnect,
-        channels: connectionSettings.channels
+        autoConnect: connectionSettings.autoConnect
       }
     );
 
@@ -40,6 +39,15 @@ module.exports = ConnectionPool = (function(){
         server: connectionSettings.url,
         message: message
       });
+      if(connectionSettings.autoConnect && connectionSettings.channels){
+        _.each(connectionSettings.channels, function(channelName){
+          client.join(channelName);
+          self.emit('irc:joining', {
+            server: connectionSettings.url,
+            channel: channelName
+          });
+        });
+      }
     }).addListener('names', function(channel, nicks){
       // console.log('[irc event]', '[names]', channel, nicks);
       self.emit('irc:names', {

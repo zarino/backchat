@@ -243,9 +243,14 @@ window.ChannelButtonView = window.BackchatView.extend({
   },
 
   ipcEvents: {
+    'channel:joining': function(e){
+      if(this.isRightChannel(e) && this.isAboutMe(e)){
+        this.$el.addClass('loading');
+      }
+    },
     'channel:joined': function(e){
       if(this.isRightChannel(e) && this.isAboutMe(e)){
-        this.$el.removeClass('unjoined');
+        this.$el.removeClass('loading unjoined');
       }
     },
     'channel:parted': function(e){

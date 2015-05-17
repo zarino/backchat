@@ -12,7 +12,6 @@
   padding-bottom: 1em;
 
   h1 {
-    position: relative;
     padding: 0 4em 0 1em;
     font-size: inherit;
     margin: 1em 0 0.4em 0;
@@ -25,21 +24,6 @@
 
     &.disconnected {
       color: mix($color-mac-sidebar-heading, $color-mac-sidebar-background, 50%);
-    }
-
-    &.loading {
-      &:after {
-        display: block;
-        height: 16px;
-        width: 16px;
-        content: "";
-        background: transparent url(../img/sidebar-spinner.svg) 0 0 no-repeat;
-        background-size: 16px 16px;
-        position: absolute;
-        top: 50%;
-        right: 1em;
-        margin-top: -9px;
-      }
     }
   }
 
@@ -63,6 +47,23 @@
       &:focus {
         color: rgba(255,255,255,0.5);
       }
+    }
+  }
+
+  .loading {
+    position: relative;
+
+    &:after {
+      display: block;
+      height: 16px;
+      width: 16px;
+      content: "";
+      background: transparent url(../img/sidebar-spinner.svg) 0 0 no-repeat;
+      background-size: 16px 16px;
+      position: absolute;
+      top: 50%;
+      right: 1em;
+      margin-top: -9px;
     }
   }
 }
