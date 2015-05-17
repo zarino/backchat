@@ -12,7 +12,8 @@
   padding-bottom: 1em;
 
   h1 {
-    padding: 0 4em 0 1em;
+    padding: 0 5em 0 1em;
+    position: relative;
     font-size: inherit;
     margin: 1em 0 0.4em 0;
     font-weight: normal;
@@ -29,7 +30,8 @@
 
   button {
     @include button-unstyled();
-    padding: 0.4em 4em 0.4em 2em;
+    position: relative;
+    padding: 0.4em 5em 0.4em 2em;
     color: $color-mac-sidebar-link;
 
     &.active {
@@ -51,8 +53,6 @@
   }
 
   .loading {
-    position: relative;
-
     &:after {
       display: block;
       height: 16px;
@@ -65,5 +65,46 @@
       right: 1em;
       margin-top: -9px;
     }
+  }
+}
+
+.button-badges {
+  position: absolute;
+  top: 50%;
+  right: 1em;
+  margin-top: -10px;
+
+  & > * {
+    float: left;
+    font-size: 0.8em;
+    line-height: 1em;
+    padding: 0.3em 0.6em;
+    background-color: $color-mac-sidebar-selected;
+    font-weight: bold;
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
+
+    .active & {
+      background-color: #fff;
+    }
+
+    :focus & {
+      background-color: #fff;
+      color: $color-mac-sidebar-focussed;
+    }
+
+    &.important {
+      background-color: $color-mac-red;
+      color: #fff;
+    }
+  }
+
+  & > :first-child {
+    @include border-left-radius(4em);
+    padding-left: 0.7em;
+  }
+
+  & > :last-child {
+    @include border-right-radius(4em);
+    padding-right: 0.7em;
   }
 }
