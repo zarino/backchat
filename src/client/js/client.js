@@ -357,18 +357,33 @@ window.ChannelView = window.BackchatView.extend({
     $userButtons.detach().appendTo($userButtonList);
   },
 
+  appendToScrollback: function($newElement){
+    // If the user is within 50px of the bottom of the scrollback,
+    // reposition the scrollback after the new element has been added,
+    // so that they're still scrolled to the bottom.
+    var outer = this.$('.channel__scrollback').height();
+    var inner = this.$('.channel__scrollback__inner').outerHeight();
+    var offset = this.$('.channel__scrollback').scrollTop();
+
+    this.$('.channel__scrollback__inner').append($newElement);
+
+    if(inner - outer - offset < 50){
+      this.$('.channel__scrollback').scrollTop(inner);
+    }
+  },
+
   addMessage: function(fromUser, messageText){
-    $('<p>')
+    var $newElement = $('<p>')
       .addClass('channel__message')
-      .html('<b>' + fromUser + ' says —</b> ' + messageText)
-      .appendTo(this.$('.channel__scrollback__inner'));
+      .html('<b>' + fromUser + ' says —</b> ' + messageText);
+    this.appendToScrollback($newElement);
   },
 
   addAction: function(fromUser, actionText){
-    $('<p>')
+    var $newElement = $('<p>')
       .addClass('channel__action')
-      .html('<b>' + fromUser + '</b> ' + actionText)
-      .appendTo(this.$('.channel__scrollback__inner'));
+      .html('<b>' + fromUser + '</b> ' + actionText);
+    this.appendToScrollback($newElement);
   },
 
   addStageDirection: function(options){
@@ -379,17 +394,17 @@ window.ChannelView = window.BackchatView.extend({
     } else if('userParted' in options){
       var html = '<b>' + options.userParted + '</b> left the channel';
     }
-    $('<p>')
+    var $newElement = $('<p>')
       .addClass('channel__stage-direction')
-      .html(html)
-      .appendTo(this.$('.channel__scrollback__inner'));
+      .html(html);
+    this.appendToScrollback($newElement);
   },
 
   addServerMessage: function(messageText){
-    $('<div>')
+    var $newElement = $('<div>')
       .addClass('channel__server-message')
-      .html('<pre>' + messageText + '</pre>')
-      .appendTo(this.$('.channel__scrollback__inner'));
+      .html('<pre>' + messageText + '</pre>');
+    this.appendToScrollback($newElement);
   }
 });
 
