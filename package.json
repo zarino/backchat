@@ -22,7 +22,7 @@
     "chromedriver": "^2.15.0",
     "electron-packager": "^3.1.0",
     "electron-prebuilt": "^0.25.2",
-    "ircdjs": "git://github.com/zarino/ircd.js#dd142ce",
+    "ircdjs": "git://github.com/alexyoung/ircd.js",
     "mocha": "~1.18.0",
     "promise": "^7.0.1",
     "selenium-webdriver": "~2.45.1"
