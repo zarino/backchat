@@ -211,6 +211,7 @@ window.ChannelButtonView = window.BackchatView.extend({
 
   render: function(){
     this.$el.text(this.options.channelName);
+    this.$el.append('<div class="button-badges">');
     if(this.options.unjoined){
       this.$el.addClass('unjoined');
     }
@@ -261,6 +262,35 @@ window.ChannelButtonView = window.BackchatView.extend({
         this.$el.addClass('unjoined');
       }
     }
+  },
+
+  addNotification: function(isImportant){
+    var $buttonBadges = this.$('.button-badges');
+    if(isImportant){
+      var $badge = $buttonBadges.children('.important');
+      if($badge.length){
+        var currentValue = parseInt($badge.text());
+        $badge.text(currentValue + 1);
+      } else {
+        $badge = $('<span>').addClass('important');
+        $badge.appendTo($buttonBadges);
+        $badge.text(1);
+      }
+    } else {
+      var $badge = $buttonBadges.children().not('.important');
+      if($badge.length){
+        var currentValue = parseInt($badge.text());
+        $badge.text(currentValue + 1);
+      } else {
+        $badge = $('<span>');
+        $badge.prependTo($buttonBadges);
+        $badge.text(1);
+      }
+    }
+  },
+
+  clearNotifications: function(){
+    this.$('.button-badges').empty();
   }
 });
 
@@ -318,14 +348,19 @@ window.ChannelView = window.BackchatView.extend({
   focus: function(){
     this.$el.addClass('active').siblings().removeClass('active');
 
-    var id = this.options.serverUrl + ' ' + this.options.channelName;
-    window.app.channelButtonViews[id].$el.addClass('active').siblings().removeClass('active');
+    this.getChannelButtonView().$el.addClass('active').siblings().removeClass('active');
+    this.getChannelButtonView().clearNotifications();
 
     this.$('.channel__input').focus();
     window.activeChannel = this;
   },
 
   userButtonViews: {}, // Store button views here, keyed by username
+
+  getChannelButtonView: function(){
+    var id = this.options.serverUrl + ' ' + this.options.channelName;
+    return window.app.channelButtonViews[id];
+  },
 
   listUsers: function(users){
     var self = this;
@@ -387,6 +422,7 @@ window.ChannelView = window.BackchatView.extend({
       .addClass('channel__message')
       .html('<b>' + fromUser + ' says —</b> ' + messageText);
     this.appendToScrollback($newElement);
+    this.contentHasBeenAdded();
   },
 
   addAction: function(fromUser, actionText){
@@ -394,6 +430,7 @@ window.ChannelView = window.BackchatView.extend({
       .addClass('channel__action')
       .html('<b>' + fromUser + '</b> ' + actionText);
     this.appendToScrollback($newElement);
+    this.contentHasBeenAdded();
   },
 
   addStageDirection: function(options){
@@ -408,6 +445,7 @@ window.ChannelView = window.BackchatView.extend({
       .addClass('channel__stage-direction')
       .html(html);
     this.appendToScrollback($newElement);
+    this.contentHasBeenAdded();
   },
 
   addServerMessage: function(messageText){
@@ -415,6 +453,13 @@ window.ChannelView = window.BackchatView.extend({
       .addClass('channel__server-message')
       .html('<pre>' + messageText + '</pre>');
     this.appendToScrollback($newElement);
+    this.contentHasBeenAdded();
+  },
+
+  contentHasBeenAdded: function(isImportant){
+    if(window.isBlurred || window.activeChannel != this){
+      this.getChannelButtonView().addNotification(isImportant);
+    }
   }
 });
 
@@ -424,6 +469,7 @@ ipc.on('window:blurred', function(){
   window.isBlurred = true;
 }).on('window:focussed', function(){
   window.isBlurred = false;
+  window.activeChannel.getChannelButtonView().clearNotifications();
 });
 
 
