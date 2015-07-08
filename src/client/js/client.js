@@ -483,6 +483,7 @@ window.ChannelView = window.BackchatView.extend({
     }
     if(window.isBlurred && isImportant){
       ipc.send('client:incrementDockBadge');
+      ipc.send('client:bounceDock');
     }
   }
 });
@@ -496,7 +497,6 @@ ipc.on('window:blurred', function(){
   window.activeChannel.getChannelButtonView().clearNotifications();
   ipc.send('client:clearDockBadge');
 });
-
 
 $(function(){
 

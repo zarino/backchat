@@ -115,6 +115,9 @@ ipc.on('client:ready', function(){
 }).on('client:clearDockBadge', function(){
   app.dock.setBadge('');
 
+}).on('client:bounceDock', function(){
+  app.dock.bounce('informational');
+
 });
 
 pool.on('irc:registering', function(e){
