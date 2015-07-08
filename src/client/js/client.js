@@ -65,6 +65,8 @@ window.AppView = window.BackchatView.extend({
           self.addChannelView(server.url, channelName);
         });
       });
+      // Add the user's specified keywords
+      self.keywords.concat(settings.keywords);
     },
     'channel:joined': function(e){
       this.addServerButton(e.server);
@@ -76,6 +78,7 @@ window.AppView = window.BackchatView.extend({
       v.addStageDirection({ userJoined: e.user });
       v.addUserButton(e.user);
       v.sortUserButtons();
+      this.keywords.append(e.user);
     },
     'channel:parted': function(e){
       this.addServerButton(e.server);
@@ -110,12 +113,19 @@ window.AppView = window.BackchatView.extend({
     },
     'server:whois': function(e){
       window.activeChannel.addServerMessage(JSON.stringify(e.info, null, 2));
+    },
+    'nick:changed': function(e){
+      this.keywords = _.reject(this.keywords, function(keyword){
+        return keyword === e.oldNick;
+      });
+      this.keywords.append(e.newNick);
     }
   },
 
   channelViews: {}, // Store channels views in here, keyed by serverUrl+channelName
   serverButtonViews: {}, // Keyed by serverUrl
   channelButtonViews: {}, // Keyed by serverUrl+channelName
+  keywords: [], // Words that should trigger a notification
 
   addChannelView: function(serverUrl, channelName){
     var id = serverUrl + ' ' + channelName;

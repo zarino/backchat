@@ -8,8 +8,8 @@
       "userName": "nodebot122",
       "realName": "Node Bot 122",
       "autoConnect": true,
-      "channels": [ "#bots" ],
-      "keywords": [ "tannoy" ]
+      "channels": [ "#bots" ]
     }
-  ]
+  ],
+  "keywords": [ "tannoy" ]
 }
