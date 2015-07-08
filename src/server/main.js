@@ -104,6 +104,17 @@ ipc.on('client:ready', function(){
     );
   }
 
+}).on('client:incrementDockBadge', function(){
+  var currentValue = 0;
+  if( _.isFinite(app.dock.getBadge()) ){
+    currentValue = parseFloat(app.dock.getBadge());
+  }
+  var newValueAsString = '' + (1 + currentValue);
+  app.dock.setBadge(newValueAsString);
+
+}).on('client:clearDockBadge', function(){
+  app.dock.setBadge('');
+
 });
 
 pool.on('irc:registering', function(e){

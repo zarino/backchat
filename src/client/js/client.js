@@ -66,7 +66,7 @@ window.AppView = window.BackchatView.extend({
         });
       });
       // Add the user's specified keywords
-      self.keywords.concat(settings.keywords);
+      self.keywords = self.keywords.concat(settings.keywords);
     },
     'channel:joined': function(e){
       this.addServerButton(e.server);
@@ -78,7 +78,7 @@ window.AppView = window.BackchatView.extend({
       v.addStageDirection({ userJoined: e.user });
       v.addUserButton(e.user);
       v.sortUserButtons();
-      this.keywords.append(e.user);
+      this.keywords.push(e.user);
     },
     'channel:parted': function(e){
       this.addServerButton(e.server);
@@ -118,7 +118,7 @@ window.AppView = window.BackchatView.extend({
       this.keywords = _.reject(this.keywords, function(keyword){
         return keyword === e.oldNick;
       });
-      this.keywords.append(e.newNick);
+      this.keywords.push(e.newNick);
     }
   },
 
@@ -432,7 +432,7 @@ window.ChannelView = window.BackchatView.extend({
       .addClass('channel__message')
       .html('<b>' + fromUser + ' says —</b> ' + messageText);
     this.appendToScrollback($newElement);
-    this.contentHasBeenAdded();
+    this.contentHasBeenAdded(this.contentIsImportant(messageText));
   },
 
   addAction: function(fromUser, actionText){
@@ -440,7 +440,7 @@ window.ChannelView = window.BackchatView.extend({
       .addClass('channel__action')
       .html('<b>' + fromUser + '</b> ' + actionText);
     this.appendToScrollback($newElement);
-    this.contentHasBeenAdded();
+    this.contentHasBeenAdded(this.contentIsImportant(actionText));
   },
 
   addStageDirection: function(options){
@@ -466,9 +466,23 @@ window.ChannelView = window.BackchatView.extend({
     this.contentHasBeenAdded();
   },
 
+  contentIsImportant: function(content){
+    var content = content.toLowerCase();
+    var isImportant = false;
+    _.each(window.app.keywords, function(keyword){
+      if(content.indexOf(keyword.toLowerCase()) > -1){
+        isImportant = true;
+      }
+    });
+    return isImportant;
+  },
+
   contentHasBeenAdded: function(isImportant){
     if(window.isBlurred || window.activeChannel != this){
       this.getChannelButtonView().addNotification(isImportant);
+    }
+    if(window.isBlurred && isImportant){
+      ipc.send('client:incrementDockBadge');
     }
   }
 });
@@ -480,6 +494,7 @@ ipc.on('window:blurred', function(){
 }).on('window:focussed', function(){
   window.isBlurred = false;
   window.activeChannel.getChannelButtonView().clearNotifications();
+  ipc.send('client:clearDockBadge');
 });
 
 
