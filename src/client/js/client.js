@@ -480,6 +480,9 @@ window.ChannelView = window.BackchatView.extend({
   contentHasBeenAdded: function(isImportant){
     if(window.isBlurred || window.activeChannel != this){
       this.getChannelButtonView().addNotification(isImportant);
+      if(isImportant){
+        window.beep();
+      }
     }
     if(window.isBlurred && isImportant){
       ipc.send('client:incrementDockBadge');
@@ -497,6 +500,11 @@ ipc.on('window:blurred', function(){
   window.activeChannel.getChannelButtonView().clearNotifications();
   ipc.send('client:clearDockBadge');
 });
+
+window.beep = function beep(){
+  var audio = new Audio('mp3/ping.mp3');
+  audio.play();
+}
 
 $(function(){
 
