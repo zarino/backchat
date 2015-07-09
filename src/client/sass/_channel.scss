@@ -78,6 +78,11 @@
   &:first-child {
     margin-top: 0;
   }
+
+  .timestamp {
+    color: #999;
+    margin-right: 0.5em;
+  }
 }
 
 .channel__stage-direction {
@@ -100,6 +105,11 @@
   &:last-child {
     padding-bottom: 0;
     border-bottom: none;
+  }
+
+  .timestamp {
+    float: left;
+    color: #ccc;
   }
 }
 

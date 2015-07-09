@@ -24,6 +24,11 @@ var renderTemplate = function renderTemplate(templateName, data){
   }
 }
 
+var getTimestamp = function getTimestamp(){
+  var now = new Date();
+  return '[' + now.toLocaleTimeString(undefined, {hour12: false}) + ']';
+}
+
 
 window.BackchatView = Backbone.View.extend({
   initialize: function(options) {
@@ -430,7 +435,11 @@ window.ChannelView = window.BackchatView.extend({
   addMessage: function(fromUser, messageText){
     var $newElement = $('<p>')
       .addClass('channel__message')
-      .html('<b>' + fromUser + ' says —</b> ' + messageText);
+      .html(renderTemplate('message', {
+        timestamp: getTimestamp(),
+        subject: fromUser + ' says —',
+        message: messageText
+      }));
     this.appendToScrollback($newElement);
     this.contentHasBeenAdded(this.contentIsImportant(messageText));
   },
@@ -438,22 +447,33 @@ window.ChannelView = window.BackchatView.extend({
   addAction: function(fromUser, actionText){
     var $newElement = $('<p>')
       .addClass('channel__action')
-      .html('<b>' + fromUser + '</b> ' + actionText);
+      .html(renderTemplate('message', {
+        timestamp: getTimestamp(),
+        subject: fromUser,
+        message: actionText
+      }));
     this.appendToScrollback($newElement);
     this.contentHasBeenAdded(this.contentIsImportant(actionText));
   },
 
   addStageDirection: function(options){
     if('topic' in options){
-      var html = '<b>Topic is:</b> ' + options.topic;
+      var subject = 'Topic is:';
+      var message = options.topic;
     } else if('userJoined' in options){
-      var html = '<b>' + options.userJoined + '</b> joined the channel';
+      var subject = options.userJoined;
+      var message = 'joined the channel';
     } else if('userParted' in options){
-      var html = '<b>' + options.userParted + '</b> left the channel';
+      var subject = options.userParted;
+      var message = 'left the channel';
     }
     var $newElement = $('<p>')
       .addClass('channel__stage-direction')
-      .html(html);
+      .html(renderTemplate('message', {
+        timestamp: getTimestamp(),
+        subject: subject,
+        message: message
+      }));
     this.appendToScrollback($newElement);
     this.contentHasBeenAdded();
   },
