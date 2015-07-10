@@ -517,7 +517,9 @@ ipc.on('window:blurred', function(){
   window.isBlurred = true;
 }).on('window:focussed', function(){
   window.isBlurred = false;
-  window.activeChannel.getChannelButtonView().clearNotifications();
+  if('activeChannel' in window){
+    window.activeChannel.getChannelButtonView().clearNotifications();
+  }
   ipc.send('client:clearDockBadge');
 });
 
