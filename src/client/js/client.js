@@ -24,9 +24,9 @@ var renderTemplate = function renderTemplate(templateName, data){
   }
 }
 
-var getTimestamp = function getTimestamp(){
-  var now = new Date();
-  return '[' + now.toLocaleTimeString(undefined, {hour12: false}) + ']';
+var timeFormat = function timeFormat(timestamp){
+  var d = new Date(timestamp);
+  return '[' + d.toLocaleTimeString(undefined, {hour12: false}) + ']';
 }
 
 
@@ -80,7 +80,7 @@ window.AppView = window.BackchatView.extend({
       if(!window.activeChannel){
         v.focus();
       }
-      v.addStageDirection({ userJoined: e.user });
+      v.addStageDirection({ userJoined: e.user, timestamp: e.timestamp });
       v.addUserButton(e.user);
       v.sortUserButtons();
       this.keywords.push(e.user);
@@ -89,7 +89,7 @@ window.AppView = window.BackchatView.extend({
       this.addServerButton(e.server);
       this.addChannelButton(e.server, e.channel);
       var v = this.addChannelView(e.server, e.channel)
-      v.addStageDirection({ userParted: e.user });
+      v.addStageDirection({ userParted: e.user, timestamp: e.timestamp });
       v.removeUserButton(e.user);
     },
     'channel:usersListed': function(e){
@@ -102,22 +102,25 @@ window.AppView = window.BackchatView.extend({
       this.addServerButton(e.server);
       this.addChannelButton(e.server, e.toUserOrChannel);
       this.addChannelView(e.server, e.toUserOrChannel)
-        .addMessage(e.fromUser, e.messageText);
+        .addMessage(e.fromUser, e.messageText, e.timestamp);
     },
     'action:sent': function(e){
       this.addServerButton(e.server);
       this.addChannelButton(e.server, e.toUserOrChannel);
       this.addChannelView(e.server, e.toUserOrChannel)
-        .addAction(e.fromUser, e.actionText);
+        .addAction(e.fromUser, e.actionText, e.timestamp);
     },
     'channel:topicChanged': function(e){
       this.addServerButton(e.server);
       this.addChannelButton(e.server, e.channel);
       this.addChannelView(e.server, e.channel)
-        .addStageDirection({ topic: e.topic });
+        .addStageDirection({ topic: e.topic, timestamp: e.timestamp });
     },
     'server:whois': function(e){
-      window.activeChannel.addServerMessage(JSON.stringify(e.info, null, 2));
+      window.activeChannel.addServerMessage(
+        JSON.stringify(e.info, null, 2),
+        e.timestamp
+      );
     },
     'nick:changed': function(e){
       this.keywords = _.reject(this.keywords, function(keyword){
@@ -432,11 +435,11 @@ window.ChannelView = window.BackchatView.extend({
     }
   },
 
-  addMessage: function(fromUser, messageText){
+  addMessage: function(fromUser, messageText, timestamp){
     var $newElement = $('<p>')
       .addClass('channel__message')
       .html(renderTemplate('message', {
-        timestamp: getTimestamp(),
+        timestamp: timeFormat(timestamp),
         subject: fromUser + ' says —',
         message: messageText
       }));
@@ -444,11 +447,11 @@ window.ChannelView = window.BackchatView.extend({
     this.contentHasBeenAdded(this.contentIsImportant(messageText));
   },
 
-  addAction: function(fromUser, actionText){
+  addAction: function(fromUser, actionText, timestamp){
     var $newElement = $('<p>')
       .addClass('channel__action')
       .html(renderTemplate('message', {
-        timestamp: getTimestamp(),
+        timestamp: timeFormat(timestamp),
         subject: fromUser,
         message: actionText
       }));
@@ -470,7 +473,7 @@ window.ChannelView = window.BackchatView.extend({
     var $newElement = $('<p>')
       .addClass('channel__stage-direction')
       .html(renderTemplate('message', {
-        timestamp: getTimestamp(),
+        timestamp: timeFormat(options.timestamp),
         subject: subject,
         message: message
       }));
@@ -478,7 +481,7 @@ window.ChannelView = window.BackchatView.extend({
     this.contentHasBeenAdded();
   },
 
-  addServerMessage: function(messageText){
+  addServerMessage: function(messageText, timestamp){
     var $newElement = $('<div>')
       .addClass('channel__server-message')
       .html('<pre>' + messageText + '</pre>');

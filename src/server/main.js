@@ -121,34 +121,42 @@ ipc.on('client:ready', function(){
 });
 
 pool.on('irc:registering', function(e){
+  e.timestamp = ISOTimestamp();
   console.log('server:connecting', JSON.stringify(e, null, 2));
   mainWindow.webContents.send('server:connecting', e);
 
 }).on('irc:registered', function(e){
+  e.timestamp = ISOTimestamp();
   console.log('server:connected', JSON.stringify(e, null, 2));
   mainWindow.webContents.send('server:connected', e);
 
 }).on('irc:joining', function(e){
+  e.timestamp = ISOTimestamp();
   console.log('channel:joining', JSON.stringify(e, null, 2));
   mainWindow.webContents.send('channel:joining', e);
 
 }).on('irc:join', function(e){
+  e.timestamp = ISOTimestamp();
   console.log('channel:joined', JSON.stringify(e, null, 2));
   mainWindow.webContents.send('channel:joined', e);
 
 }).on('irc:part', function(e){
+  e.timestamp = ISOTimestamp();
   console.log('channel:parted', JSON.stringify(e, null, 2));
   mainWindow.webContents.send('channel:parted', e);
 
 }).on('irc:topic', function(e){
+  e.timestamp = ISOTimestamp();
   console.log('channel:topicChanged', JSON.stringify(e, null, 2));
   mainWindow.webContents.send('channel:topicChanged', e);
 
 }).on('irc:names', function(e){
+  e.timestamp = ISOTimestamp();
   console.log('channel:usersListed', JSON.stringify(e, null, 2));
   mainWindow.webContents.send('channel:usersListed', e);
 
 }).on('irc:message', function(e){
+  e.timestamp = ISOTimestamp();
   console.log('message:sent', JSON.stringify(e, null, 2));
   var eventType = 'message:sent';
 
@@ -167,6 +175,7 @@ pool.on('irc:registering', function(e){
   mainWindow.webContents.send(eventType, e);
 
 }).on('irc:action', function(e){
+  e.timestamp = ISOTimestamp();
   console.log('action:sent', JSON.stringify(e, null, 2));
 
   // Swap the "channel name" round if this is an incoming direct message.
@@ -177,10 +186,12 @@ pool.on('irc:registering', function(e){
   mainWindow.webContents.send('action:sent', e);
 
 }).on('irc:changedNick', function(e){
+  e.timestamp = ISOTimestamp();
   console.log('nick:changed', JSON.stringify(e, null, 2));
   mainWindow.webContents.send('nick:changed', e);
 
 }).on('irc:whois', function(e){
+  e.timestamp = ISOTimestamp();
   console.log('server:whois', JSON.stringify(e, null, 2));
   mainWindow.webContents.send('server:whois', e);
 
@@ -209,3 +220,6 @@ var getSettings = function getSettings(cb){
   });
 }
 
+var ISOTimestamp = function ISOTimestamp(){
+  return new Date().toISOString();
+}
