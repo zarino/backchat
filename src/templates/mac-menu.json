@@ -35,6 +35,19 @@
     ]
   },
   {
+    "label": "Channel",
+    "submenu": [
+      { "label": "This channel", "enabled": false },
+      { "label": "Show logs", "command": "application:showLogs", "accelerator": "Shift+Command+L" },
+      { "label": "Leave channel", "command": "application:leaveChannel", "accelerator": "Shift+Command+W" },
+      { "type": "separator" },
+      { "label": "Next channel", "command": "application:nextChannel", "accelerator": "Command+]" },
+      { "label": "Previous channel", "command": "application:previousChannel", "accelerator": "Command+[" },
+      { "type": "separator" },
+      { "label": "Join channel…", "command": "application:joinChannel", "accelerator": "Command+K" }
+    ]
+  },
+  {
     "label": "Window",
     "submenu": [
       { "label": "Minimize", "selector": "performMiniaturize:", "accelerator": "Command+M" },
