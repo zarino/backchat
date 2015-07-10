@@ -1,4 +1,4 @@
-var fs = require('fs');
+var fse = require('fs-extra');
 var path = require('path');
 
 var _ = require('underscore-plus');
@@ -21,6 +21,8 @@ var DEBUG = process.env.hasOwnProperty('BACKCHAT_DEBUG');
 if(DEBUG){
   console.log('** Running Backchat in DEBUG mode **');
 }
+
+var loggingDirectory = path.join(app.getPath('userData'), 'Logs');
 
 app.on('ready', function() {
 
@@ -139,21 +141,25 @@ pool.on('irc:registering', function(e){
   e.timestamp = ISOTimestamp();
   console.log('channel:joined', JSON.stringify(e, null, 2));
   mainWindow.webContents.send('channel:joined', e);
+  saveToLog('channel:joined', e);
 
 }).on('irc:part', function(e){
   e.timestamp = ISOTimestamp();
   console.log('channel:parted', JSON.stringify(e, null, 2));
   mainWindow.webContents.send('channel:parted', e);
+  saveToLog('channel:parted', e);
 
 }).on('irc:topic', function(e){
   e.timestamp = ISOTimestamp();
   console.log('channel:topicChanged', JSON.stringify(e, null, 2));
   mainWindow.webContents.send('channel:topicChanged', e);
+  saveToLog('channel:topicChanged', e);
 
 }).on('irc:names', function(e){
   e.timestamp = ISOTimestamp();
   console.log('channel:usersListed', JSON.stringify(e, null, 2));
   mainWindow.webContents.send('channel:usersListed', e);
+  saveToLog('channel:usersListed', e);
 
 }).on('irc:message', function(e){
   e.timestamp = ISOTimestamp();
@@ -173,6 +179,7 @@ pool.on('irc:registering', function(e){
   }
 
   mainWindow.webContents.send(eventType, e);
+  saveToLog(eventType, e);
 
 }).on('irc:action', function(e){
   e.timestamp = ISOTimestamp();
@@ -184,11 +191,13 @@ pool.on('irc:registering', function(e){
   }
 
   mainWindow.webContents.send('action:sent', e);
+  saveToLog('action:sent', e);
 
 }).on('irc:changedNick', function(e){
   e.timestamp = ISOTimestamp();
   console.log('nick:changed', JSON.stringify(e, null, 2));
   mainWindow.webContents.send('nick:changed', e);
+  saveToLog('nick:changed', e);
 
 }).on('irc:whois', function(e){
   e.timestamp = ISOTimestamp();
@@ -207,7 +216,7 @@ var getSettings = function getSettings(cb){
 
   // Running normally, so check for existing user settings
   var settingsFile = path.join(app.getPath('appData'), pkgJson.name, 'settings.json');
-  fs.readFile(settingsFile, 'utf8', function(err, settingsStream) {
+  fse.readFile(settingsFile, 'utf8', function(err, settingsStream) {
     if(settingsStream){
       var settingsObject = JSON.parse(settingsStream.toString());
       cb(settingsObject);
@@ -222,4 +231,40 @@ var getSettings = function getSettings(cb){
 
 var ISOTimestamp = function ISOTimestamp(){
   return new Date().toISOString();
+}
+
+var saveToLog = function saveToLog(type, e){
+  var row = '[' + e.timestamp + '] ';
+
+  if(type == 'channel:topicChanged'){
+    row += 'Topic is: ' + e.topic;
+    var channel = e.channel;
+  } else if(type == 'channel:usersListed') {
+    row += 'Users: ' + e.users.join(', ');
+    var channel = e.channel;
+  } else if(type == 'channel:joined'){
+    row += e.user + ' joined the channel';
+    var channel = e.channel;
+  } else if(type == 'channel:parted'){
+    row += e.user + ' left the channel';
+    var channel = e.channel;
+  } else if(type == 'message:sent'){
+    row += '<' + e.fromUser + '> ' + e.messageText;
+    var channel = e.toUserOrChannel;
+  } else if(type == 'action:sent'){
+    row += '• ' + e.fromUser + ' ' + e.actionText;
+    var channel = e.toUserOrChannel;
+  } else if(type == 'nick:changed'){
+    row += e.oldNick + ' is now known as ' + e.newNick;
+    var channel = e.channel;
+  }
+
+  row += "\n";
+
+  var isoDate = new Date(e.timestamp).toISOString().substring(0,10);
+  var logDir = path.join(loggingDirectory, e.server, channel);
+
+  fse.ensureDir(logDir, function(){
+    fse.appendFile(path.join(logDir, isoDate + '.txt'), row);
+  });
 }
