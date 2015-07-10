@@ -127,6 +127,13 @@ window.AppView = window.BackchatView.extend({
         return keyword === e.oldNick;
       });
       this.keywords.push(e.newNick);
+    },
+    'application:getActiveChannel': function(e){
+      ipc.send(e.ipcCallback, {
+        serverUrl: window.activeChannel.options.serverUrl,
+        channelName: window.activeChannel.options.channelName,
+        updatedTimestamp: window.activeChannel.updatedTimestamp
+      });
     }
   },
 
@@ -374,6 +381,7 @@ window.ChannelView = window.BackchatView.extend({
   },
 
   userButtonViews: {}, // Store button views here, keyed by username
+  updatedTimestamp: '', // Store time of latest message, for log retrieval
 
   getChannelButtonView: function(){
     var id = this.options.serverUrl + ' ' + this.options.channelName;
@@ -445,6 +453,7 @@ window.ChannelView = window.BackchatView.extend({
       }));
     this.appendToScrollback($newElement);
     this.contentHasBeenAdded(this.contentIsImportant(messageText));
+    this.updatedTimestamp = timestamp;
   },
 
   addAction: function(fromUser, actionText, timestamp){
@@ -457,6 +466,7 @@ window.ChannelView = window.BackchatView.extend({
       }));
     this.appendToScrollback($newElement);
     this.contentHasBeenAdded(this.contentIsImportant(actionText));
+    this.updatedTimestamp = timestamp;
   },
 
   addStageDirection: function(options){
@@ -479,6 +489,7 @@ window.ChannelView = window.BackchatView.extend({
       }));
     this.appendToScrollback($newElement);
     this.contentHasBeenAdded();
+    this.updatedTimestamp = options.timestamp;
   },
 
   addServerMessage: function(messageText, timestamp){
@@ -487,6 +498,7 @@ window.ChannelView = window.BackchatView.extend({
       .html('<pre>' + messageText + '</pre>');
     this.appendToScrollback($newElement);
     this.contentHasBeenAdded();
+    this.updatedTimestamp = timestamp;
   },
 
   contentIsImportant: function(content){

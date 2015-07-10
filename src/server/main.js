@@ -5,6 +5,7 @@ var _ = require('underscore-plus');
 
 var app = require('app');
 var ipc = require('ipc');
+var shell = require('shell');
 var Menu = require('menu');
 var MenuItem = require('menu-item');
 var BrowserWindow = require('browser-window');
@@ -35,6 +36,10 @@ app.on('ready', function() {
     BrowserWindow.getFocusedWindow().reload();
   }).on('window:toggle-dev-tools', function(){
     BrowserWindow.getFocusedWindow().toggleDevTools();
+  }).on('application:showLogsForCurrentChannel', function(){
+    mainWindow.webContents.send('application:getActiveChannel', {
+      ipcCallback: 'client:showLogsForChannel'
+    });
   });
 
   mainWindow = new BrowserWindow({
@@ -119,6 +124,11 @@ ipc.on('client:ready', function(){
 
 }).on('client:bounceDock', function(){
   app.dock.bounce('informational');
+
+}).on('client:showLogsForChannel', function(e, args){
+  var isoDate = args.updatedTimestamp.substring(0,10);
+  var logFile = path.join(loggingDirectory, args.serverUrl, args.channelName, isoDate + '.txt');
+  shell.showItemInFolder(logFile);
 
 });
 
