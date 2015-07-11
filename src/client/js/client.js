@@ -339,8 +339,19 @@ window.UserButtonView = window.BackchatView.extend({
 
   ipcEvents: {
     'nick:changed': function(details){
-      this.options.nick = details.newNick;
-      this.$el.text(details.newNick);
+      if(details.oldNick == this.options.nick){
+        this.options.nick = details.newNick;
+        this.$el.text(details.newNick);
+      }
+    },
+    'server:userStatus': function(details){
+      if(details.nick == this.options.nick){
+        if(details.away == true) {
+          this.$el.addClass('away');
+        } else if(details.away == false){
+          this.$el.removeClass('away');
+        }
+      }
     }
   }
 });

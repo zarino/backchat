@@ -214,6 +214,10 @@ pool.on('irc:registering', function(e){
   console.log('server:whois', JSON.stringify(e, null, 2));
   mainWindow.webContents.send('server:whois', e);
 
+}).on('irc:userStatus', function(e){
+  console.log('server:userStatus', JSON.stringify(e, null, 2));
+  mainWindow.webContents.send('server:userStatus', e);
+
 });
 
 var getSettings = function getSettings(cb){
