@@ -111,6 +111,12 @@ ipc.on('client:ready', function(){
     );
   }
 
+}).on('client:refreshUserStatusesForChannel', function(e, args){
+  pool.getConnection(args.serverUrl).send('WHO', args.channelName);
+
+}).on('client:refreshUserStatus', function(e, args){
+  pool.getConnection(args.serverUrl).send('WHOIS', args.nick);
+
 }).on('client:incrementDockBadge', function(){
   var currentValue = 0;
   if( _.isFinite(app.dock.getBadge()) ){

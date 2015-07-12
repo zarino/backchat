@@ -81,7 +81,7 @@ module.exports = ConnectionPool = (function(){
         user: nick,
         myNick: client.nick
       });
-      refreshUserStatuses({ oneOff: true });
+      client.send('WHO', channel);
 
     }).addListener('part', function(channel, nick, reason, message){
       // console.log('[irc event]', '[part]', channel, nick, reason);
@@ -179,6 +179,10 @@ module.exports = ConnectionPool = (function(){
       self.emit('irc:whois', {
         server: connectionSettings.url,
         info: info
+      });
+      self.emit('irc:userStatus', {
+        nick: info.nick,
+        away: ('away' in info)
       });
 
     }).addListener('channellist_start', function(){
