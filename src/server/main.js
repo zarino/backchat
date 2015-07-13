@@ -211,9 +211,9 @@ pool.on('irc:registering', function(e){
 
 }).on('irc:changedNick', function(e){
   e.timestamp = ISOTimestamp();
-  console.log('nick:changed', JSON.stringify(e, null, 2));
-  mainWindow.webContents.send('nick:changed', e);
-  saveToLog('nick:changed', e);
+  console.log('user:nickChanged', JSON.stringify(e, null, 2));
+  mainWindow.webContents.send('user:nickChanged', e);
+  saveToLog('user:nickChanged', e);
 
 }).on('irc:whois', function(e){
   e.timestamp = ISOTimestamp();
@@ -221,8 +221,8 @@ pool.on('irc:registering', function(e){
   mainWindow.webContents.send('server:whois', e);
 
 }).on('irc:userStatus', function(e){
-  console.log('server:userStatus', JSON.stringify(e, null, 2));
-  mainWindow.webContents.send('server:userStatus', e);
+  console.log('user:userStatus', JSON.stringify(e, null, 2));
+  mainWindow.webContents.send('user:userStatus', e);
 
 });
 
@@ -274,7 +274,7 @@ var saveToLog = function saveToLog(type, e){
   } else if(type == 'action:sent'){
     row += '• ' + e.fromUser + ' ' + e.actionText;
     var channel = e.toUserOrChannel;
-  } else if(type == 'nick:changed'){
+  } else if(type == 'user:nickChanged'){
     row += e.oldNick + ' is now known as ' + e.newNick;
     var channel = e.channel;
   }

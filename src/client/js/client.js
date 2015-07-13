@@ -2,7 +2,7 @@ var ipc = require('ipc');
 
 // By default, EventEmitter will raise a warning when more than 10
 // IPC listeners are attached at the same time. We tend to hit the
-// limit when adding nick:changed listeners to a batch of users in
+// limit when adding user:nickChanged listeners to a batch of users in
 // a newly-joined channel. This ups the limit to 100.
 ipc.setMaxListeners(100);
 
@@ -122,7 +122,7 @@ window.AppView = window.BackchatView.extend({
         e.timestamp
       );
     },
-    'nick:changed': function(e){
+    'user:nickChanged': function(e){
       this.keywords = _.reject(this.keywords, function(keyword){
         return keyword === e.oldNick;
       });
@@ -287,7 +287,7 @@ window.ChannelButtonView = window.BackchatView.extend({
         this.$el.addClass('unjoined');
       }
     },
-    'server:userStatus': function(details){
+    'user:userStatus': function(details){
       if(details.server == this.options.serverUrl) {
         if(details.nick == this.options.channelName){
           if(details.away == true) {
@@ -349,7 +349,7 @@ window.UserButtonView = window.BackchatView.extend({
   },
 
   ipcEvents: {
-    'nick:changed': function(details){
+    'user:nickChanged': function(details){
       if(details.server == this.options.serverUrl) {
         if(details.oldNick == this.options.nick){
           this.options.nick = details.newNick;
@@ -357,7 +357,7 @@ window.UserButtonView = window.BackchatView.extend({
         }
       }
     },
-    'server:userStatus': function(details){
+    'user:userStatus': function(details){
       if(details.server == this.options.serverUrl) {
         if(details.nick == this.options.nick){
           if(details.away == true) {
