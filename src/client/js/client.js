@@ -286,6 +286,17 @@ window.ChannelButtonView = window.BackchatView.extend({
       if(this.isRightChannel(e) && this.isAboutMe(e)){
         this.$el.addClass('unjoined');
       }
+    },
+    'server:userStatus': function(details){
+      if(details.server == this.options.serverUrl) {
+        if(details.nick == this.options.channelName){
+          if(details.away == true) {
+            this.$el.addClass('away');
+          } else if(details.away == false){
+            this.$el.removeClass('away');
+          }
+        }
+      }
     }
   },
 
