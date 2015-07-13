@@ -181,6 +181,7 @@ module.exports = ConnectionPool = (function(){
         info: info
       });
       self.emit('irc:userStatus', {
+        server: connectionSettings.url,
         nick: info.nick,
         away: ('away' in info)
       });
@@ -199,16 +200,19 @@ module.exports = ConnectionPool = (function(){
 
       if(message.command == 'rpl_whoreply'){
         self.emit('irc:userStatus', {
+          server: connectionSettings.url,
           nick: message.args[5],
           away: message.args[6].startsWith('G')
         });
       } else if(message.command == 'rpl_nowaway'){
         self.emit('irc:userStatus', {
+          server: connectionSettings.url,
           nick: message.args[0],
           away: true
         });
       } else if(message.command == 'rpl_unaway'){
         self.emit('irc:userStatus', {
+          server: connectionSettings.url,
           nick: message.args[0],
           away: false
         });
