@@ -137,6 +137,10 @@ window.AppView = window.BackchatView.extend({
       // Add the user's specified keywords
       self.keywords = self.keywords.concat(settings.keywords);
     },
+    'server:connected': function(e){
+      // The server replies with our nick. Add it to keywords.
+      this.keywords.push(e.message.args[0]);
+    },
     'channel:joined': function(e){
       this.addServerButton(e.server);
       this.addChannelButton(e.server, e.channel);
@@ -147,7 +151,6 @@ window.AppView = window.BackchatView.extend({
       v.addStageDirection({ userJoined: e.user, timestamp: e.timestamp });
       v.addUserButton(e.user);
       v.sortUserButtons();
-      this.keywords.push(e.user);
     },
     'channel:parted': function(e){
       this.addServerButton(e.server);
