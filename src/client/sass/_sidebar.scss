@@ -35,10 +35,6 @@
     color: $color-mac-sidebar-link;
 
     &.active {
-      background-color: $color-mac-sidebar-selected;
-    }
-
-    &:focus {
       background-color: $color-mac-sidebar-focussed;
       color: #fff;
     }
@@ -47,6 +43,7 @@
       color: mix($color-mac-sidebar-heading, $color-mac-sidebar-background, 50%);
 
       &:focus {
+        background-color: $color-mac-sidebar-selected;
         color: rgba(255,255,255,0.5);
       }
     }
@@ -72,6 +69,10 @@
       top: 50%;
       right: 1em;
       margin-top: -9px;
+    }
+
+    &.active:after {
+      background-image: url(../img/sidebar-spinner-white.svg);
     }
   }
 }
