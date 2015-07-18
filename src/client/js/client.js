@@ -29,6 +29,70 @@ var timeFormat = function timeFormat(timestamp){
   return '[' + d.toLocaleTimeString(undefined, {hour12: false}) + ']';
 }
 
+var handleNotifications = function handleNotifications(event){
+  var incrementChannelBadge = false;
+  var importantChannelBadge = false;
+  var notificationBalloon = false;
+  var incrementDockBadge = false;
+  var bounceDock = false;
+  var beep = false;
+
+  // Test event properties, in order of importance
+  if(event.type == 'message' || event.type == 'action' || event.type == 'stageDirection'){
+    if(window.isBlurred || event.channel != window.activeChannel){
+      incrementChannelBadge = true;
+    }
+
+    if(window.isBlurred){
+      incrementDockBadge = true;
+    }
+
+    if(includesKeyword(event.content) || event.channel.options.channelName == event.from){
+      if(window.isBlurred || event.channel != window.activeChannel){
+        importantChannelBadge = true;
+        beep = true;
+      }
+
+      if(window.isBlurred) {
+        notificationBalloon = true;
+        bounceDock = true;
+      }
+    }
+
+    if(includesKeyword(event.content)){
+      beep = true;
+    }
+  }
+
+  // Now actually do the notifications
+  if(incrementChannelBadge){
+    event.channel.getChannelButtonView().addNotification(importantChannelBadge);
+  }
+  if(beep){
+    window.beep();
+  }
+  if(incrementDockBadge){
+    ipc.send('client:incrementDockBadge');
+  }
+  if(bounceDock){
+    ipc.send('client:bounceDock');
+  }
+  if(notificationBalloon){
+    new Notification(event.channel.options.channelName, { body: event.content });
+  }
+}
+
+var includesKeyword = function includesKeyword(text){
+  var text = text.toLowerCase();
+  var isImportant = false;
+  _.each(window.app.keywords, function(keyword){
+    if(text.indexOf(keyword.toLowerCase()) > -1){
+      isImportant = true;
+    }
+  });
+  return isImportant;
+}
+
 
 window.BackchatView = Backbone.View.extend({
   initialize: function(options) {
@@ -478,7 +542,12 @@ window.ChannelView = window.BackchatView.extend({
         message: messageText
       }));
     this.appendToScrollback($newElement);
-    this.contentHasBeenAdded(this.contentIsImportant(messageText));
+    handleNotifications({
+      type: 'message',
+      channel: this,
+      from: fromUser,
+      content: messageText
+    });
     this.updatedTimestamp = timestamp;
   },
 
@@ -491,30 +560,40 @@ window.ChannelView = window.BackchatView.extend({
         message: actionText
       }));
     this.appendToScrollback($newElement);
-    this.contentHasBeenAdded(this.contentIsImportant(actionText));
+    handleNotifications({
+      type: 'action',
+      channel: this,
+      from: fromUser,
+      content: actionText
+    });
     this.updatedTimestamp = timestamp;
   },
 
   addStageDirection: function(options){
     if('topic' in options){
       var subject = 'Topic is:';
-      var message = options.topic;
+      var messageText = options.topic;
     } else if('userJoined' in options){
       var subject = options.userJoined;
-      var message = 'joined the channel';
+      var messageText = 'joined the channel';
     } else if('userParted' in options){
       var subject = options.userParted;
-      var message = 'left the channel';
+      var messageText = 'left the channel';
     }
     var $newElement = $('<p>')
       .addClass('channel__stage-direction')
       .html(renderTemplate('message', {
         timestamp: timeFormat(options.timestamp),
         subject: subject,
-        message: message
+        message: messageText
       }));
     this.appendToScrollback($newElement);
-    this.contentHasBeenAdded();
+    handleNotifications({
+      type: 'stageDirection',
+      channel: this,
+      from: undefined,
+      content: messageText
+    });
     this.updatedTimestamp = options.timestamp;
   },
 
@@ -523,32 +602,13 @@ window.ChannelView = window.BackchatView.extend({
       .addClass('channel__server-message')
       .html('<pre>' + messageText + '</pre>');
     this.appendToScrollback($newElement);
-    this.contentHasBeenAdded();
-    this.updatedTimestamp = timestamp;
-  },
-
-  contentIsImportant: function(content){
-    var content = content.toLowerCase();
-    var isImportant = false;
-    _.each(window.app.keywords, function(keyword){
-      if(content.indexOf(keyword.toLowerCase()) > -1){
-        isImportant = true;
-      }
+    handleNotifications({
+      type: 'serverMessage',
+      channel: this,
+      from: undefined,
+      content: messageText
     });
-    return isImportant;
-  },
-
-  contentHasBeenAdded: function(isImportant){
-    if(window.isBlurred || window.activeChannel != this){
-      this.getChannelButtonView().addNotification(isImportant);
-      if(isImportant){
-        window.beep();
-      }
-    }
-    if(window.isBlurred && isImportant){
-      ipc.send('client:incrementDockBadge');
-      ipc.send('client:bounceDock');
-    }
+    this.updatedTimestamp = timestamp;
   }
 });
 
