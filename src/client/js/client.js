@@ -93,11 +93,27 @@ var includesKeyword = function includesKeyword(text){
   return isImportant;
 }
 
+var escapeHtml = function escapeHtml(text){
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 var wrapKeywords = function wrapKeywords(text, htmlTag){
   _.each(window.app.keywords, function(keyword){
     var pattern = new RegExp(keyword, 'ig');
     text = text.replace(pattern, '<' + htmlTag +'>$&</' + htmlTag + '>');
   })
+  return text;
+}
+
+// Prepare a string for display in the channel scrollback
+var messageFormat = function messageFormat(text){
+  text = escapeHtml(text);
+  text = wrapKeywords(text, 'strong');
   return text;
 }
 
@@ -562,8 +578,8 @@ window.ChannelView = window.BackchatView.extend({
       .addClass('channel__message')
       .html(renderTemplate('message', {
         timestamp: timeFormat(timestamp),
-        subject: fromUser + ' says —',
-        message: wrapKeywords(messageText, 'strong')
+        subject: escapeHtml(fromUser) + ' says —',
+        message: messageFormat(messageText, 'strong')
       }));
     if(includesKeyword(messageText)){
       $newElement.addClass('highlighted');
@@ -583,8 +599,8 @@ window.ChannelView = window.BackchatView.extend({
       .addClass('channel__message')
       .html(renderTemplate('message', {
         timestamp: timeFormat(timestamp, 'strong'),
-        subject: fromUser,
-        message: wrapKeywords(actionText)
+        subject: escapeHtml(fromUser),
+        message: messageFormat(actionText)
       }));
     if(includesKeyword(actionText)){
       $newElement.addClass('highlighted');
@@ -614,8 +630,8 @@ window.ChannelView = window.BackchatView.extend({
       .addClass('channel__stage-direction')
       .html(renderTemplate('message', {
         timestamp: timeFormat(options.timestamp),
-        subject: subject,
-        message: messageText
+        subject: escapeHtml(subject),
+        message: escapeHtml(messageText)
       }));
     this.appendToScrollback($newElement);
     handleNotifications({
@@ -636,7 +652,7 @@ window.ChannelView = window.BackchatView.extend({
       type: 'serverMessage',
       channel: this,
       from: undefined,
-      content: messageText
+      content: escapeHtml(messageText)
     });
     this.updatedTimestamp = timestamp;
   }
