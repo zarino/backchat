@@ -132,3 +132,17 @@
     border: 1px solid $color-mac-sidebar-border;
   }
 }
+
+hr.bookmark {
+  margin: 0;
+  border: none;
+  border-top: 1px dashed #ccc;
+
+  margin-top: -1px;
+  position: relative;
+  background: #fff;
+
+  &:last-child {
+    padding-bottom: $padding-scrollback-item;
+  }
+}

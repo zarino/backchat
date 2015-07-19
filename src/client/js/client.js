@@ -471,13 +471,26 @@ window.ChannelView = window.BackchatView.extend({
     }
   },
 
-  focus: function(){
-    this.$el.addClass('active').siblings().removeClass('active');
+  unfocus: function(){
+    this.$el.removeClass('active');
+    this.getChannelButtonView().$el.removeClass('active');
 
-    this.getChannelButtonView().$el.addClass('active').siblings().removeClass('active');
+    this.$('.channel__scrollback__inner .bookmark').remove();
+    this.appendToScrollback('<hr class="bookmark">');
+  },
+
+  focus: function(){
+    if('activeChannel' in window){
+      window.activeChannel.unfocus();
+    }
+
+    this.$el.addClass('active');
+    this.getChannelButtonView().$el.addClass('active');
+
     this.getChannelButtonView().clearNotifications();
 
     this.$('.channel__input').focus();
+
     window.activeChannel = this;
   },
 
