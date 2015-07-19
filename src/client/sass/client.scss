@@ -18,6 +18,16 @@ html {
 
 a {
   cursor: default;
+
+  &[href^="http"],
+  &[href^="mailto"],
+  &[href^="tel"] {
+    cursor: pointer;
+
+    &:hover {
+      text-decoration: none;
+    }
+  }
 }
 
 body {

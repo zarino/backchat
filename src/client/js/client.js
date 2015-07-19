@@ -1,4 +1,5 @@
 var ipc = require('ipc');
+var Autolinker = require('autolinker');
 
 // By default, EventEmitter will raise a warning when more than 10
 // IPC listeners are attached at the same time. We tend to hit the
@@ -110,10 +111,15 @@ var wrapKeywords = function wrapKeywords(text, htmlTag){
   return text;
 }
 
+var linkifyUrls = function linkifyUrls(text){
+  return Autolinker.link(text, {stripPrefix: false, hashtag: false});
+}
+
 // Prepare a string for display in the channel scrollback
 var messageFormat = function messageFormat(text){
   text = escapeHtml(text);
   text = wrapKeywords(text, 'strong');
+  text = linkifyUrls(text);
   return text;
 }
 

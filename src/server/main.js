@@ -56,6 +56,11 @@ app.on('ready', function() {
     mainWindow.webContents.send('window:focussed');
   });
 
+  mainWindow.webContents.on('new-window', function(e, url, frame){
+    e.preventDefault();
+    shell.openExternal(url);
+  });
+
 });
 
 app.on('window-all-closed', function() {
