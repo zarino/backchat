@@ -94,10 +94,6 @@
 
     .active & {
       background-color: #fff;
-    }
-
-    :focus & {
-      background-color: #fff;
       color: $color-mac-sidebar-focussed;
     }
 
