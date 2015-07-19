@@ -93,6 +93,14 @@ var includesKeyword = function includesKeyword(text){
   return isImportant;
 }
 
+var wrapKeywords = function wrapKeywords(text, htmlTag){
+  _.each(window.app.keywords, function(keyword){
+    var pattern = new RegExp(keyword, 'ig');
+    text = text.replace(pattern, '<' + htmlTag +'>$&</' + htmlTag + '>');
+  })
+  return text;
+}
+
 
 window.BackchatView = Backbone.View.extend({
   initialize: function(options) {
@@ -542,8 +550,11 @@ window.ChannelView = window.BackchatView.extend({
       .html(renderTemplate('message', {
         timestamp: timeFormat(timestamp),
         subject: fromUser + ' says —',
-        message: messageText
+        message: wrapKeywords(messageText, 'strong')
       }));
+    if(includesKeyword(messageText)){
+      $newElement.addClass('highlighted');
+    }
     this.appendToScrollback($newElement);
     handleNotifications({
       type: 'message',
@@ -556,12 +567,15 @@ window.ChannelView = window.BackchatView.extend({
 
   addAction: function(fromUser, actionText, timestamp){
     var $newElement = $('<p>')
-      .addClass('channel__action')
+      .addClass('channel__message')
       .html(renderTemplate('message', {
-        timestamp: timeFormat(timestamp),
+        timestamp: timeFormat(timestamp, 'strong'),
         subject: fromUser,
-        message: actionText
+        message: wrapKeywords(actionText)
       }));
+    if(includesKeyword(actionText)){
+      $newElement.addClass('highlighted');
+    }
     this.appendToScrollback($newElement);
     handleNotifications({
       type: 'action',
