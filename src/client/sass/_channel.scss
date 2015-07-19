@@ -123,13 +123,24 @@
 }
 
 .channel__server-message {
-  pre {
-    margin: 0;
-    padding: 0.8em 1em;
-    font-family: Consolas, Monaco, "Lucida Console", monospace;
-    border-radius: 0.2em;
-    background: $color-mac-sidebar-background;
-    border: 1px solid $color-mac-sidebar-border;
+  background: $color-bluesteel;
+  color: mix(#fff, $color-bluesteel, 90%);
+
+  // Collapse padding when two appear
+  // immediately after each other
+  & + & {
+    padding-top: 0;
+  }
+
+  .code {
+    display: block;
+    font-size: 0.9em;
+    font-family: $font-family-monospace;
+    white-space: pre-wrap;
+  }
+
+  .timestamp {
+    color: mix(#fff, $color-bluesteel, 40%);
   }
 }
 

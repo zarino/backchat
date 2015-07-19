@@ -216,7 +216,8 @@ window.AppView = window.BackchatView.extend({
     'server:whois': function(e){
       window.activeChannel.addServerMessage(
         JSON.stringify(e.info, null, 2),
-        e.timestamp
+        e.timestamp,
+        '/whois ' + e.info.nick
       );
     },
     'user:nickChanged': function(e){
@@ -649,10 +650,14 @@ window.ChannelView = window.BackchatView.extend({
     this.updatedTimestamp = options.timestamp;
   },
 
-  addServerMessage: function(messageText, timestamp){
+  addServerMessage: function(messageText, timestamp, command){
     var $newElement = $('<div>')
       .addClass('channel__server-message')
-      .html('<pre>' + messageText + '</pre>');
+      .html(renderTemplate('message', {
+        timestamp: timeFormat(timestamp),
+        subject: escapeHtml(command),
+        message: '<span class="code">' + escapeHtml(messageText) + '</span>'
+      }));
     this.appendToScrollback($newElement);
     handleNotifications({
       type: 'serverMessage',
