@@ -286,6 +286,12 @@ var saveToLog = function saveToLog(type, e){
 
   row += "\n";
 
+  if(typeof channel === 'undefined'){
+    // Make sure the event included a channel name.
+    // If not, just abort saving this event to logs.
+    return;
+  }
+
   var isoDate = new Date(e.timestamp).toISOString().substring(0,10);
   var logDir = path.join(loggingDirectory, e.server, channel);
 

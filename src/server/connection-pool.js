@@ -199,6 +199,11 @@ module.exports = ConnectionPool = (function(){
       console.log('[irc event]', '[raw]', message);
 
       if(message.command == 'rpl_whoreply'){
+        if(message.args.length < 7){
+          // Some servers don't supply a 6th element
+          // containing the user’s status.
+          return;
+        }
         self.emit('irc:userStatus', {
           server: connectionSettings.url,
           nick: message.args[5],

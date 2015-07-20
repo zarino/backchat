@@ -32,6 +32,7 @@
   "scripts": {
     "test": "scripts/build && BACKCHAT_DEBUG=True mocha test",
     "start": "scripts/start",
-    "build": "scripts/build"
+    "build": "scripts/build",
+    "server": "scripts/server"
   }
 }
