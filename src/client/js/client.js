@@ -485,15 +485,19 @@ window.ChannelView = window.BackchatView.extend({
       var $input = $(e.currentTarget);
 
       if(e.keyCode == 13 && !e.altKey){
+        // enter without alt
         e.preventDefault();
+
         ipc.send('client:sendMessage', {
           serverUrl: this.options.serverUrl,
           toUserOrChannel: this.options.channelName,
           messageText: $input.val()
         });
+        this.sentMessages.push($input.val()); // store message in channel history
         $input.val(''); // clear the input
 
       } else if(e.keyCode == 9 && !e.altKey && !e.shiftKey) {
+        // tab without alt or shift
         e.preventDefault();
 
         var cursorPosition = $input[0].selectionStart;
@@ -514,6 +518,47 @@ window.ChannelView = window.BackchatView.extend({
           $input[0].setSelectionRange(newCursorPosition, newCursorPosition);
         } else {
           window.funk();
+        }
+
+      } else if(e.keyCode == 38 && e.altKey){
+        // alt-up-arrow
+        e.preventDefault();
+
+        var text = $input.val();
+        var index = _.lastIndexOf(this.sentMessages, text);
+
+        if(index == -1){
+          // Current input value is not in sent messages, so it must be new.
+          if($.trim(text) != ''){
+            // Append the current text content to the sent message list,
+            // and then pull out the one that came before it.
+            this.sentMessages.push(text);
+            $input.val(this.sentMessages.slice(-2,-1)[0]);
+          } else {
+            // No current text to save, so just pull out the last message.
+            $input.val(_.last(this.sentMessages));
+          }
+        } else if(index > 0) {
+          // Current input value is in sent messages,
+          // and there is at least one older message.
+          $input.val(this.sentMessages[index - 1])
+        }
+
+      } else if(e.keyCode == 40 && e.altKey){
+        // alt-down-arrow
+        e.preventDefault();
+        var text = $input.val();
+
+        var index = _.lastIndexOf(this.sentMessages, text);
+
+        if(index > -1 && index < this.sentMessages.length - 1){
+          // Current input value is in sent messages,
+          // and there is at least one newer message.
+          $input.val(this.sentMessages[index + 1])
+        } else if(index == this.sentMessages.length - 1){
+          // We're at the most recent item in the list,
+          // so the next item will just be a blank string.
+          $input.val('');
         }
       }
     }
@@ -544,6 +589,7 @@ window.ChannelView = window.BackchatView.extend({
 
   userButtonViews: {}, // Store button views here, keyed by username
   updatedTimestamp: '', // Store time of latest message, for log retrieval
+  sentMessages: [],
 
   getChannelButtonView: function(){
     var id = this.options.serverUrl + ' ' + this.options.channelName;
