@@ -481,15 +481,40 @@ window.ChannelView = window.BackchatView.extend({
   },
 
   events: {
-    'keypress .channel__input': function(e){
+    'keydown .channel__input': function(e){
       var $input = $(e.currentTarget);
+
       if(e.keyCode == 13 && !e.altKey){
+        e.preventDefault();
         ipc.send('client:sendMessage', {
           serverUrl: this.options.serverUrl,
           toUserOrChannel: this.options.channelName,
           messageText: $input.val()
         });
         $input.val(''); // clear the input
+
+      } else if(e.keyCode == 9 && !e.altKey && !e.shiftKey) {
+        e.preventDefault();
+
+        var cursorPosition = $input[0].selectionStart;
+        var allText = $input.val();
+        var textBeforeCursor = allText.substring(0, cursorPosition);
+        var textAfterCursor = allText.substring(cursorPosition);
+        var wordsBeforeCursor = textBeforeCursor.split(' ');
+        var currentWord = _.last(wordsBeforeCursor);
+        var textBeforeCurrentWord = textBeforeCursor.slice(0, currentWord.length * -1);
+
+        var matchingNicks = _.filter(_.keys(this.userButtonViews), function(nick){
+          return nick.toLowerCase().startsWith(currentWord.toLowerCase());
+        });
+
+        if(matchingNicks.length == 1){
+          var newCursorPosition = textBeforeCurrentWord.length + matchingNicks[0].length;
+          $input.val(textBeforeCurrentWord + matchingNicks[0] + textAfterCursor);
+          $input[0].setSelectionRange(newCursorPosition, newCursorPosition);
+        } else {
+          window.funk();
+        }
       }
     }
   },
@@ -683,6 +708,11 @@ ipc.on('window:blurred', function(){
 
 window.beep = function beep(){
   var audio = new Audio('mp3/ping.mp3');
+  audio.play();
+}
+
+window.funk = function funk(){
+  var audio = new Audio('mp3/funk.mp3');
   audio.play();
 }
 
