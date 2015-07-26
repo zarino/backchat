@@ -15,6 +15,8 @@ var AppMenu = require('./app-menu');
 var ConnectionPool = require('./connection-pool');
 
 var mainWindow = null;
+var macMenu = null;
+var channelButtonMenu = null;
 var pool = new ConnectionPool();
 
 var DEBUG = process.env.hasOwnProperty('BACKCHAT_DEBUG');
@@ -27,10 +29,13 @@ var loggingDirectory = path.join(app.getPath('userData'), 'Logs');
 
 app.on('ready', function() {
 
-  var menu = new AppMenu({pkgJson: pkgJson});
-  menu.attachToWindow(mainWindow);
+  macMenu = new AppMenu({
+    templateJson: '../templates/mac-menu.json',
+    pkgJson: pkgJson
+  });
+  Menu.setApplicationMenu(macMenu.menu);
 
-  menu.on('application:quit', function(){
+  macMenu.on('application:quit', function(){
     app.quit();
   }).on('window:reload', function(){
     BrowserWindow.getFocusedWindow().reload();
@@ -61,6 +66,23 @@ app.on('ready', function() {
   mainWindow.webContents.on('new-window', function(e, url, frame){
     e.preventDefault();
     shell.openExternal(url);
+  });
+
+  channelButtonMenu = new AppMenu({
+    templateJson: '../templates/channel-menu.json',
+    pkgJson: pkgJson
+  });
+
+  channelButtonMenu.on('application:leaveChannel', function(){
+    mainWindow.webContents.send('application:leaveChannel', {
+      serverUrl: this.serverUrl,
+      channelName: this.channelName
+    });
+  }).on('application:showLogsForChannel', function(){
+    showLogsForChannel({
+      serverUrl: this.serverUrl,
+      channelName: this.channelName
+    });
   });
 
 });
@@ -139,10 +161,12 @@ ipc.on('client:ready', function(){
   app.dock.bounce('informational');
 
 }).on('client:showLogsForChannel', function(e, args){
-  var isoDate = args.updatedTimestamp.substring(0,10);
-  var logFile = path.join(loggingDirectory, args.serverUrl, args.channelName, isoDate + '.txt');
-  shell.showItemInFolder(logFile);
+  showLogsForChannel(args);
 
+}).on('client:showChannelButtonContextMenu', function(e, args){
+  channelButtonMenu.serverUrl = args.serverUrl;
+  channelButtonMenu.channelName = args.channelName;
+  channelButtonMenu.menu.popup(mainWindow);
 });
 
 pool.on('irc:registering', function(e){
@@ -294,4 +318,14 @@ var saveToLog = function saveToLog(type, e){
   fse.ensureDir(logDir, function(){
     fse.appendFile(path.join(logDir, isoDate + '.txt'), row);
   });
+}
+
+var showLogsForChannel = function showLogsForChannel(args){
+  if('updatedTimestamp' in args){
+    var isoDate = args.updatedTimestamp.substring(0,10);
+    var logFile = path.join(loggingDirectory, args.serverUrl, args.channelName, isoDate + '.txt');
+  } else {
+    var logFile = path.join(loggingDirectory, args.serverUrl, args.channelName);
+  }
+  shell.showItemInFolder(logFile);
 }

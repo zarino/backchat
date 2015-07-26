@@ -4,7 +4,6 @@ var Menu = require('menu');
 var _ = require('underscore-plus');
 var EventEmitter = require('events').EventEmitter;
 
-var menuJson = require('../templates/mac-menu.json');
 var ApplicationMenu;
 
 module.exports = ApplicationMenu = (function(){
@@ -13,12 +12,9 @@ module.exports = ApplicationMenu = (function(){
 
   // Class constructor
   function ApplicationMenu(options){
+    var menuJson = require(options.templateJson);
     this.template = this.translateTemplate(menuJson, options.pkgJson);
-  };
-
-  ApplicationMenu.prototype.attachToWindow = function(window){
     this.menu = Menu.buildFromTemplate(_.deepClone(this.template));
-    Menu.setApplicationMenu(this.menu);
   };
 
   ApplicationMenu.prototype.wireUpMenu = function(menu, command){

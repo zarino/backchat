@@ -1,0 +1,4 @@
+[
+  { "label": "Show logs", "command": "application:showLogsForChannel" },
+  { "label": "Leave channel", "command": "application:leaveChannel" }
+]

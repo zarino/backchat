@@ -235,6 +235,9 @@ window.AppView = window.BackchatView.extend({
     },
     'application:leaveCurrentChannel': function(){
       window.activeChannel.close();
+    },
+    'application:leaveChannel': function(e){
+      this.channelViews[e.serverUrl + ' ' + e.channelName].close();
     }
   },
 
@@ -350,6 +353,12 @@ window.ChannelButtonView = window.BackchatView.extend({
     'click': function(){
       var id = this.options.serverUrl + ' ' + this.options.channelName;
       window.app.channelViews[id].focus();
+    },
+    'contextmenu': function(){
+      ipc.send('client:showChannelButtonContextMenu', {
+        serverUrl: this.options.serverUrl,
+        channelName: this.options.channelName
+      });
     }
   },
 
