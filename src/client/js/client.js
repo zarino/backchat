@@ -604,6 +604,14 @@ window.ChannelView = window.BackchatView.extend({
   close: function(){
     var id = this.options.serverUrl + ' ' + this.options.channelName;
 
+    // Formally leave the channel on IRC
+    if(this.isRealChannel()){
+      ipc.send('client:leaveChannel', {
+        serverUrl: this.options.serverUrl,
+        channelName: this.options.channelName,
+      });
+    }
+
     // Switch to the nearest channel in the sidebar.
     var $nearestChannelButtonView = this.getChannelButtonView().$el.prev('button');
     if($nearestChannelButtonView.length == 0){
@@ -644,6 +652,12 @@ window.ChannelView = window.BackchatView.extend({
       self.addUserButton(user);
     });
     self.sortUserButtons();
+  },
+
+  isRealChannel: function(){
+    // Useful for telling whether this is a real channel,
+    // or a just a private message session.
+    return this.options.channelName.startsWith('#');
   },
 
   addUserButton: function(nick){

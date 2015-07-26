@@ -140,6 +140,10 @@ ipc.on('client:ready', function(){
     );
   }
 
+}).on('client:leaveChannel', function(e, args){
+  console.log('** client:leaveChannel **', args.serverUrl, '**', args.channelName, '**');
+  pool.getConnection(args.serverUrl).part(args.channelName);
+
 }).on('client:refreshUserStatusesForChannel', function(e, args){
   pool.getConnection(args.serverUrl).send('WHO', args.channelName);
 
