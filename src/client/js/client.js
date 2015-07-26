@@ -232,6 +232,9 @@ window.AppView = window.BackchatView.extend({
         channelName: window.activeChannel.options.channelName,
         updatedTimestamp: window.activeChannel.updatedTimestamp
       });
+    },
+    'application:leaveCurrentChannel': function(){
+      window.activeChannel.close();
     }
   },
 
@@ -333,7 +336,9 @@ window.ChannelButtonView = window.BackchatView.extend({
   tagName: 'button',
 
   render: function(){
+    var id = this.options.serverUrl + ' ' + this.options.channelName;
     this.$el.text(this.options.channelName);
+    this.$el.attr('data-id', id);
     this.$el.append('<div class="button-badges">');
     if(this.options.unjoined){
       this.$el.addClass('unjoined');
@@ -585,6 +590,34 @@ window.ChannelView = window.BackchatView.extend({
     this.$('.channel__input').focus();
 
     window.activeChannel = this;
+  },
+
+  close: function(){
+    var id = this.options.serverUrl + ' ' + this.options.channelName;
+
+    // Switch to the nearest channel in the sidebar.
+    var $nearestChannelButtonView = this.getChannelButtonView().$el.prev('button');
+    if($nearestChannelButtonView.length == 0){
+      $nearestChannelButtonView = this.getChannelButtonView().$el.next('button');
+    }
+    window.app.channelViews[ $nearestChannelButtonView.attr('data-id') ].focus();
+
+    // Remove this channel's channelButton.
+    this.getChannelButtonView().remove();
+    delete window.app.channelButtonViews[id];
+
+    // Remove all userButtons.
+    this.userButtonViews = _.each(
+      this.userButtonViews,
+      function(userButtonView, nick, userButtonViews){
+        userButtonView.remove();
+        delete userButtonViews[nick];
+      }
+    );
+
+    // Remove this channelView.
+    this.remove();
+    delete window.app.channelViews[id];
   },
 
   userButtonViews: {}, // Store button views here, keyed by username

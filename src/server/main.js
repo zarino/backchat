@@ -40,6 +40,8 @@ app.on('ready', function() {
     mainWindow.webContents.send('application:getActiveChannel', {
       ipcCallback: 'client:showLogsForChannel'
     });
+  }).on('application:leaveCurrentChannel', function(){
+    mainWindow.webContents.send('application:leaveCurrentChannel');
   });
 
   mainWindow = new BrowserWindow({
