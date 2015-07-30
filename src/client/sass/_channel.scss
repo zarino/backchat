@@ -4,6 +4,10 @@
   &.active {
     display: flex;
   }
+
+  &.unjoined .channel__scrollback {
+    color: #666;
+  }
 }
 
 .channel__scrollback {

@@ -43,7 +43,6 @@
       color: mix($color-mac-sidebar-heading, $color-mac-sidebar-background, 50%);
 
       &:focus {
-        background-color: $color-mac-sidebar-selected;
         color: rgba(255,255,255,0.5);
       }
     }

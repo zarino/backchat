@@ -46,7 +46,9 @@ app.on('ready', function() {
       ipcCallback: 'client:showLogsForChannel'
     });
   }).on('application:leaveCurrentChannel', function(){
-    mainWindow.webContents.send('application:leaveCurrentChannel');
+    mainWindow.webContents.send('application:getActiveChannel', {
+      ipcCallback: 'client:leaveChannel'
+    });
   });
 
   mainWindow = new BrowserWindow({
@@ -74,10 +76,7 @@ app.on('ready', function() {
   });
 
   channelButtonMenu.on('application:leaveChannel', function(){
-    mainWindow.webContents.send('application:leaveChannel', {
-      serverUrl: this.serverUrl,
-      channelName: this.channelName
-    });
+    pool.getConnection(this.serverUrl).part(this.channelName);
   }).on('application:showLogsForChannel', function(){
     showLogsForChannel({
       serverUrl: this.serverUrl,
@@ -103,25 +102,48 @@ ipc.on('client:ready', function(){
   console.log('client:sendMessage', JSON.stringify(args, null, 2));
 
   // User wants to send an IRC command like /me, /away, or /whois
-  if(args.messageText.indexOf('/') == 0){
+  if(args.messageText.startsWith('/')){
     var messageWords = args.messageText.split(' ');
     var messageCommand = messageWords[0].toLowerCase();
     var messageWithoutFirstWord = _.rest(messageWords, 1).join(' ');
 
-    // ME
+    // ME <actionMessage>
     if (messageCommand == '/me'){
       pool.getConnection(args.serverUrl).action(
         args.toUserOrChannel,
         messageWithoutFirstWord
       );
 
-    // AWAY and AWAY <msg>
+    // AWAY and AWAY <awayMessage>
     } else if(messageCommand == '/away'){
       if(messageWords.length == 1){
         pool.getConnection(args.serverUrl).send('AWAY');
       } else {
         pool.getConnection(args.serverUrl).send('AWAY', messageWithoutFirstWord);
       }
+
+    // MSG <message> and QUERY <message>
+    } else if(messageCommand == '/msg' || messageCommand == '/query'){
+      pool.getConnection(args.serverUrl).say(
+        args.toUserOrChannel,
+        messageWithoutFirstWord
+      );
+
+    // JOIN <channelName>
+    } else if(messageCommand == '/join'){
+      pool.getConnection(args.serverUrl).join(messageWithoutFirstWord);
+
+    // PART <optional:channelName>
+    } else if(messageCommand == '/part'){
+      if(messageWithoutFirstWord.startsWith('#')){
+        pool.getConnection(args.serverUrl).part(messageWithoutFirstWord);
+      } else {
+        pool.getConnection(args.serverUrl).part(args.toUserOrChannel);
+      }
+
+    // QUIT
+    } else if(messageCommand == '/quit'){
+      pool.getConnection(args.serverUrl).disconnect();
 
     // Something else, just try your best
     } else {
@@ -141,7 +163,6 @@ ipc.on('client:ready', function(){
   }
 
 }).on('client:leaveChannel', function(e, args){
-  console.log('** client:leaveChannel **', args.serverUrl, '**', args.channelName, '**');
   pool.getConnection(args.serverUrl).part(args.channelName);
 
 }).on('client:refreshUserStatusesForChannel', function(e, args){
@@ -168,6 +189,11 @@ ipc.on('client:ready', function(){
   showLogsForChannel(args);
 
 }).on('client:showChannelButtonContextMenu', function(e, args){
+  // TODO: Change the menu items based on the type of channel. Eg:
+  // If it's a private message, option should be "Remove from sidebar".
+  // If it's a joined channel, option should be "Leave channel".
+  // If it's an unjoined channel, options should be "Join channel"
+  //   and "Remove from sidebar".
   channelButtonMenu.serverUrl = args.serverUrl;
   channelButtonMenu.channelName = args.channelName;
   channelButtonMenu.menu.popup(mainWindow);
@@ -199,7 +225,6 @@ pool.on('irc:registering', function(e){
   console.log('channel:parted', JSON.stringify(e, null, 2));
   mainWindow.webContents.send('channel:parted', e);
   saveToLog('channel:parted', e);
-
 }).on('irc:topic', function(e){
   e.timestamp = ISOTimestamp();
   console.log('channel:topicChanged', JSON.stringify(e, null, 2));

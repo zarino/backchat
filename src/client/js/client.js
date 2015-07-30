@@ -185,7 +185,7 @@ window.AppView = window.BackchatView.extend({
     'channel:parted': function(e){
       this.addServerButton(e.server);
       this.addChannelButton(e.server, e.channel);
-      var v = this.addChannelView(e.server, e.channel)
+      var v = this.addChannelView(e.server, e.channel);
       v.addStageDirection({ userParted: e.user, timestamp: e.timestamp });
       v.removeUserButton(e.user);
     },
@@ -232,12 +232,6 @@ window.AppView = window.BackchatView.extend({
         channelName: window.activeChannel.options.channelName,
         updatedTimestamp: window.activeChannel.updatedTimestamp
       });
-    },
-    'application:leaveCurrentChannel': function(){
-      window.activeChannel.close();
-    },
-    'application:leaveChannel': function(e){
-      this.channelViews[e.serverUrl + ' ' + e.channelName].close();
     }
   },
 
@@ -313,11 +307,7 @@ window.ServerButtonView = window.BackchatView.extend({
   },
 
   isRightServer: function(thing){
-    if(thing.server == this.options.serverUrl){
-      return true;
-    } else {
-      return false;
-    }
+    return (thing.server == this.options.serverUrl);
   },
 
   ipcEvents: {
@@ -364,23 +354,15 @@ window.ChannelButtonView = window.BackchatView.extend({
 
   isRightChannel: function(thing){
     var thingChannel = thing.channel || thing.toUserOrChannel;
-    if(
+    return (
       thing.server == this.options.serverUrl &&
       thingChannel == this.options.channelName
-    ){
-      return true;
-    } else {
-      return false;
-    }
+    );
   },
 
   isAboutMe: function(thing){
     var perpetrator = thing.user || thing.fromUser;
-    if(thing.myNick == perpetrator){
-      return true;
-    } else {
-      return false;
-    }
+    return (thing.myNick == perpetrator);
   },
 
   ipcEvents: {
@@ -578,6 +560,32 @@ window.ChannelView = window.BackchatView.extend({
     }
   },
 
+  ipcEvents: {
+    'channel:parted': function(e){
+      if(this.isRightChannel(e) && this.isAboutMe(e)){
+        this.leave();
+      }
+    },
+    'channel:joined': function(e){
+      if(this.isRightChannel(e) && this.isAboutMe(e)){
+        this.join();
+      }
+    }
+  },
+
+  isRightChannel: function(thing){
+    var thingChannel = thing.channel || thing.toUserOrChannel;
+    return (
+      thing.server == this.options.serverUrl &&
+      thingChannel == this.options.channelName
+    );
+  },
+
+  isAboutMe: function(thing){
+    var perpetrator = thing.user || thing.fromUser;
+    return (thing.myNick == perpetrator);
+  },
+
   unfocus: function(){
     this.$el.removeClass('active');
     this.getChannelButtonView().$el.removeClass('active');
@@ -601,16 +609,22 @@ window.ChannelView = window.BackchatView.extend({
     window.activeChannel = this;
   },
 
+  join: function(){
+    this.$el.removeClass('unjoined');
+    this.$('.channel__input').prop('disabled', false);
+  },
+
+  leave: function(){
+    this.removeUserButtons();
+    this.$el.addClass('unjoined');
+    this.$('.channel__input').prop('disabled', true);
+  },
+
+  // This isn't currently called from anywhere.
+  // But eventually, you'll be able to remove channels
+  // from the sidebar, and that will call this method.
   close: function(){
     var id = this.options.serverUrl + ' ' + this.options.channelName;
-
-    // Formally leave the channel on IRC
-    if(this.isRealChannel()){
-      ipc.send('client:leaveChannel', {
-        serverUrl: this.options.serverUrl,
-        channelName: this.options.channelName,
-      });
-    }
 
     // Switch to the nearest channel in the sidebar.
     var $nearestChannelButtonView = this.getChannelButtonView().$el.prev('button');
@@ -624,13 +638,7 @@ window.ChannelView = window.BackchatView.extend({
     delete window.app.channelButtonViews[id];
 
     // Remove all userButtons.
-    this.userButtonViews = _.each(
-      this.userButtonViews,
-      function(userButtonView, nick, userButtonViews){
-        userButtonView.remove();
-        delete userButtonViews[nick];
-      }
-    );
+    this.removeUserButtons();
 
     // Remove this channelView.
     this.remove();
@@ -654,12 +662,6 @@ window.ChannelView = window.BackchatView.extend({
     self.sortUserButtons();
   },
 
-  isRealChannel: function(){
-    // Useful for telling whether this is a real channel,
-    // or a just a private message session.
-    return this.options.channelName.startsWith('#');
-  },
-
   addUserButton: function(nick){
     if(nick in this.userButtonViews){
       return // A button already exists for this user!
@@ -680,6 +682,13 @@ window.ChannelView = window.BackchatView.extend({
       this.userButtonViews[nick].remove();
       delete this.userButtonViews[nick];
     }
+  },
+
+  removeUserButtons: function(){
+    var self = this;
+    _.each(self.userButtonViews, function(userButtonView, nick){
+      self.removeUserButton(nick);
+    });
   },
 
   sortUserButtons: function(){
