@@ -1,4 +1,7 @@
 [
-  { "label": "Show logs", "command": "application:showLogsForChannel" },
-  { "label": "Leave channel", "command": "application:leaveChannel" }
+  { "label": "Join channel", "id": "joinChannel", "command": "application:joinChannel" },
+  { "label": "Leave channel", "id": "leaveChannel", "command": "application:leaveChannel" },
+  { "label": "Remove from sidebar", "id": "closeChannel", "command": "application:closeChannel" },
+  { "type": "separator" },
+  { "label": "Show logs", "command": "application:showLogsForChannel" }
 ]

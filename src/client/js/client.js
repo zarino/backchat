@@ -347,15 +347,17 @@ window.ChannelButtonView = window.BackchatView.extend({
     'contextmenu': function(){
       ipc.send('client:showChannelButtonContextMenu', {
         serverUrl: this.options.serverUrl,
-        channelName: this.options.channelName
+        channelName: this.options.channelName,
+        joined: ! this.$el.is('.unjoined')
       });
     }
   },
 
   isRightChannel: function(thing){
-    var thingChannel = thing.channel || thing.toUserOrChannel;
+    var thingChannel = thing.channel || thing.toUserOrChannel || thing.channelName;
+    var thingServer = thing.server || thing.serverUrl;
     return (
-      thing.server == this.options.serverUrl &&
+      thingServer == this.options.serverUrl &&
       thingChannel == this.options.channelName
     );
   },
@@ -570,13 +572,19 @@ window.ChannelView = window.BackchatView.extend({
       if(this.isRightChannel(e) && this.isAboutMe(e)){
         this.join();
       }
+    },
+    'channel:close': function(e){
+      if(this.isRightChannel(e)){
+        this.close();
+      }
     }
   },
 
   isRightChannel: function(thing){
-    var thingChannel = thing.channel || thing.toUserOrChannel;
+    var thingChannel = thing.channel || thing.toUserOrChannel || thing.channelName;
+    var thingServer = thing.server || thing.serverUrl;
     return (
-      thing.server == this.options.serverUrl &&
+      thingServer == this.options.serverUrl &&
       thingChannel == this.options.channelName
     );
   },
@@ -620,18 +628,18 @@ window.ChannelView = window.BackchatView.extend({
     this.$('.channel__input').prop('disabled', true);
   },
 
-  // This isn't currently called from anywhere.
-  // But eventually, you'll be able to remove channels
-  // from the sidebar, and that will call this method.
   close: function(){
     var id = this.options.serverUrl + ' ' + this.options.channelName;
 
-    // Switch to the nearest channel in the sidebar.
+    // Switch to the nearest channel in the sidebar (if one exists).
+    // That might be the one above or below. Or neither!
     var $nearestChannelButtonView = this.getChannelButtonView().$el.prev('button');
     if($nearestChannelButtonView.length == 0){
       $nearestChannelButtonView = this.getChannelButtonView().$el.next('button');
     }
-    window.app.channelViews[ $nearestChannelButtonView.attr('data-id') ].focus();
+    if($nearestChannelButtonView.length != 0){
+      window.app.channelViews[ $nearestChannelButtonView.attr('data-id') ].focus();
+    }
 
     // Remove this channel's channelButton.
     this.getChannelButtonView().remove();

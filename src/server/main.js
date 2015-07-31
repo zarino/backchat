@@ -77,6 +77,13 @@ app.on('ready', function() {
 
   channelButtonMenu.on('application:leaveChannel', function(){
     pool.getConnection(this.serverUrl).part(this.channelName);
+  }).on('application:joinChannel', function(){
+    pool.getConnection(this.serverUrl).join(this.channelName);
+  }).on('application:closeChannel', function(){
+    mainWindow.webContents.send('channel:close', {
+      serverUrl: this.serverUrl,
+      channelName: this.channelName
+    });
   }).on('application:showLogsForChannel', function(){
     showLogsForChannel({
       serverUrl: this.serverUrl,
@@ -194,6 +201,21 @@ ipc.on('client:ready', function(){
   // If it's a joined channel, option should be "Leave channel".
   // If it's an unjoined channel, options should be "Join channel"
   //   and "Remove from sidebar".
+  if(args.channelName.startsWith('#')){
+    if(args.joined){
+      channelButtonMenu.set({ id: 'closeChannel'}, { visible: false });
+      channelButtonMenu.set({ id: 'joinChannel'}, { visible: false });
+      channelButtonMenu.set({ id: 'leaveChannel'}, { visible: true });
+    } else {
+      channelButtonMenu.set({ id: 'closeChannel'}, { visible: true });
+      channelButtonMenu.set({ id: 'joinChannel'}, { visible: true });
+      channelButtonMenu.set({ id: 'leaveChannel'}, { visible: false });
+    }
+  } else {
+    channelButtonMenu.set({ id: 'closeChannel'}, { visible: true });
+    channelButtonMenu.set({ id: 'joinChannel'}, { visible: false });
+    channelButtonMenu.set({ id: 'leaveChannel'}, { visible: false });
+  }
   channelButtonMenu.serverUrl = args.serverUrl;
   channelButtonMenu.channelName = args.channelName;
   channelButtonMenu.menu.popup(mainWindow);
