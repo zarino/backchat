@@ -18,15 +18,15 @@ module.exports = ApplicationMenu = (function(){
   };
 
   ApplicationMenu.prototype.wireUpMenuItem = function(menu, command){
-    var _this = this;
+    var self = this;
+
     menu.click = function(){
-      _this.emit(command);
+      self.emit(command);
     };
   };
 
   ApplicationMenu.prototype.translateTemplate = function(template, pkgJson){
-    var emitter = this.emit;
-    var _this = this;
+    var self = this;
 
     _.each(template, function(item){
       item.metadata = item.metadata || {};
@@ -36,11 +36,11 @@ module.exports = ApplicationMenu = (function(){
       }
 
       if(item.command){
-        _this.wireUpMenuItem(item, item.command);
+        self.wireUpMenuItem(item, item.command);
       }
 
       if(item.submenu){
-        _this.translateTemplate(item.submenu, pkgJson);
+        self.translateTemplate(item.submenu, pkgJson);
       }
     });
 
