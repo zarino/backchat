@@ -112,7 +112,25 @@ var wrapKeywords = function wrapKeywords(text, htmlTag){
 }
 
 var linkifyUrls = function linkifyUrls(text){
-  return Autolinker.link(text, {stripPrefix: false, hashtag: false});
+  var afterText = '';
+  var text = Autolinker.link(text, {
+    stripPrefix: false,
+    hashtag: false,
+    replaceFn: function(autolinker, match){
+      if(match.getType() == 'url'){
+        var link = document.createElement('a');
+        link.href = match.getUrl();
+        if(link.pathname.match(/[.](gif|png|jpg|jpeg)/i)){
+          afterText += '<a href="' + link.href + '" target="_blank"><img src="' + link.href + '"></a>';
+        }
+        return true; // Default autolinker behaviour
+      } else {
+        return true; // Default autolinker behaviour
+      }
+    }
+  });
+
+  return text + afterText;
 }
 
 // Prepare a string for display in the channel scrollback
