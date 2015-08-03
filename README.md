@@ -8,8 +8,11 @@ To run the app using the Electron bootstrapper:
 
 ```
 npm install
+./node_modules/.bin/electron-rebuild
 npm start
 ```
+
+`electron-rebuild` must be run after you install or update packages, to ensure packages are compiled for an electron-compatible version of Node. (If you get errors like `Module version mismatch. Expected 44, got 14.` it’s because you’ve not run `electron-rebuild`.)
 
 `npm start` automatically compiles the Sass stylesheets, checks the JavaScript files for syntax errors, and—if both of those things passed successfully—starts Backchat in the Electron bootstrapper.
 
