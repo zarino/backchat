@@ -1,4 +1,7 @@
 var ipc = require('ipc');
+var webframe = require('web-frame');
+
+var spellchecker = require('spellchecker');
 var Autolinker = require('autolinker');
 
 // By default, EventEmitter will raise a warning when more than 10
@@ -6,6 +9,13 @@ var Autolinker = require('autolinker');
 // limit when adding user:nickChanged listeners to a batch of users in
 // a newly-joined channel. This ups the limit to 100.
 ipc.setMaxListeners(100);
+
+// Enable spellchecking for message composition boxes.
+webframe.setSpellCheckProvider("en-GB", true, {
+  spellCheck: function(text) {
+    return ! spellchecker.isMisspelled(text);
+  }
+});
 
 // Use django-style templating in underscore.js
 // because my fat fingers can't learn angle brackets.
