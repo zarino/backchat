@@ -188,27 +188,32 @@ ipc.on('client:ready', function(){
   showLogsForChannel(args);
 
 }).on('client:showChannelButtonContextMenu', function(e, args){
-  contextMenu.construct(require('../templates/channel-menu.json'),{
+  var templateJson = [];
+
+  // Construct the right context menu options
+  // based on the state of the selected channel.
+  if(args.channelName.startsWith('#')){
+    if(args.joined){
+      templateJson.push({ label: "Leave channel", command: "application:leaveChannel" });
+    } else {
+      templateJson.push(
+        { label: "Join channel", command: "application:joinChannel" },
+        { label: "Remove from sidebar", command: "application:closeChannel" }
+      );
+    }
+  } else {
+      templateJson.push({ label: "Remove from sidebar", command: "application:closeChannel" });
+  }
+
+  templateJson.push(
+    { type: "separator" },
+    { label: "Show logs", command: "application:showLogsForChannel" }
+  );
+
+  contextMenu.construct(templateJson, {
     serverUrl: args.serverUrl,
     channelName: args.channelName
   });
-
-  if(args.channelName.startsWith('#')){
-    if(args.joined){
-      contextMenu.set({ id: 'closeChannel'}, { visible: false });
-      contextMenu.set({ id: 'joinChannel'}, { visible: false });
-      contextMenu.set({ id: 'leaveChannel'}, { visible: true });
-    } else {
-      contextMenu.set({ id: 'closeChannel'}, { visible: true });
-      contextMenu.set({ id: 'joinChannel'}, { visible: true });
-      contextMenu.set({ id: 'leaveChannel'}, { visible: false });
-    }
-  } else {
-    contextMenu.set({ id: 'closeChannel'}, { visible: true });
-    contextMenu.set({ id: 'joinChannel'}, { visible: false });
-    contextMenu.set({ id: 'leaveChannel'}, { visible: false });
-  }
-
   contextMenu.menu.popup(mainWindow);
 });
 
