@@ -260,6 +260,14 @@ window.AppView = window.BackchatView.extend({
         channelName: window.activeChannel.options.channelName,
         updatedTimestamp: window.activeChannel.updatedTimestamp
       });
+    },
+    'application:replaceSelectedWordWithSuggestion': function(e){
+      var selection = window.getSelection();
+      if (selection.rangeCount) {
+        selection.getRangeAt(0)
+          .deleteContents()
+          .insertNode(document.createTextNode(e.replacementText));
+      }
     }
   },
 
@@ -587,6 +595,20 @@ window.ChannelView = window.BackchatView.extend({
           $input.val('');
         }
       }
+    },
+    'contextmenu .channel__input': function(){
+      var spellingSuggestions;
+      var selectedText = window.getSelection().toString();
+      var numberOfWords = selectedText.split(' ').length;
+      if(numberOfWords == 1){
+        if(spellchecker.isMisspelled(selectedText)){
+          spellingSuggestions = spellchecker.getCorrectionsForMisspelling(selectedText);
+        }
+      }
+      ipc.send('client:showTextEditingContextMenu', {
+        spellingSuggestions: spellingSuggestions,
+        isEditable: true
+      });
     }
   },
 

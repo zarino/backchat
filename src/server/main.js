@@ -17,6 +17,7 @@ var ConnectionPool = require('./connection-pool');
 var mainWindow = null;
 var macMenu = null;
 var channelButtonMenu = null;
+var textEditingMenu = null;
 var pool = new ConnectionPool();
 
 var DEBUG = process.env.hasOwnProperty('BACKCHAT_DEBUG');
@@ -88,6 +89,17 @@ app.on('ready', function() {
     showLogsForChannel({
       serverUrl: this.serverUrl,
       channelName: this.channelName
+    });
+  });
+
+  textEditingMenu = new AppMenu({
+    templateJson: '../templates/text-menu.json',
+    pkgJson: pkgJson
+  });
+
+  textEditingMenu.on('application:replaceSelectedWordWithSuggestion', function(){
+    mainWindow.webContents.send('application:replaceSelectedWordWithSuggestion', {
+      replacementText: 'EXAMPLE'
     });
   });
 
@@ -196,11 +208,6 @@ ipc.on('client:ready', function(){
   showLogsForChannel(args);
 
 }).on('client:showChannelButtonContextMenu', function(e, args){
-  // TODO: Change the menu items based on the type of channel. Eg:
-  // If it's a private message, option should be "Remove from sidebar".
-  // If it's a joined channel, option should be "Leave channel".
-  // If it's an unjoined channel, options should be "Join channel"
-  //   and "Remove from sidebar".
   if(args.channelName.startsWith('#')){
     if(args.joined){
       channelButtonMenu.set({ id: 'closeChannel'}, { visible: false });
@@ -219,6 +226,29 @@ ipc.on('client:ready', function(){
   channelButtonMenu.serverUrl = args.serverUrl;
   channelButtonMenu.channelName = args.channelName;
   channelButtonMenu.menu.popup(mainWindow);
+
+}).on('client:showTextEditingContextMenu', function(e, args){
+  textEditingMenu.set({ family: 'spelling'}, { visible: false });
+
+  if(args.isEditable){
+    textEditingMenu.set({ id: 'cut'}, { enabled: true });
+    textEditingMenu.set({ id: 'paste'}, { enabled: true });
+    textEditingMenu.set({ id: 'delete'}, { enabled: true });
+    if(typeof args.spellingSuggestions !== 'undefined'){
+      textEditingMenu.set({ type: "separator", family: "spelling" }, { visible: true });
+      if(args.spellingSuggestions.length > 0){
+        // pass
+      } else {
+        textEditingMenu.set({ id: "noGuesses" }, { visible: true });
+      }
+    }
+  } else {
+    textEditingMenu.set({ id: 'cut'}, { enabled: false });
+    textEditingMenu.set({ id: 'paste'}, { enabled: false });
+    textEditingMenu.set({ id: 'delete'}, { enabled: false });
+  }
+  textEditingMenu.menu.popup(mainWindow);
+
 });
 
 pool.on('irc:registering', function(e){

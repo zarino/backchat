@@ -1,0 +1,12 @@
+[
+  { "label": "No Guesses Found", "family": "spelling", "enabled": false, "id": "noGuesses" },
+  { "type": "separator", "family": "spelling" },
+  { "label": "Cut", "id": "cut", "command": "application:nativeCut" },
+  { "label": "Copy", "command": "application:nativeCopy" },
+  { "label": "Paste", "command": "application:nativePaste" },
+  { "label": "Delete", "command": "application:nativeDelete" },
+  { "type": "separator" },
+  { "label": "Select All", "command": "application:nativeSelectAll" },
+  { "type": "separator" },
+  { "label": "Look Up in Dictionary", "command": "application:nativeLookUp" }
+]
