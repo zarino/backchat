@@ -81,6 +81,12 @@ app.on('ready', function() {
       serverUrl: this.context.serverUrl,
       channelName: this.context.channelName
     });
+  }).on('application:replaceSelectedWordWithSuggestion', function(e){
+    mainWindow.webContents.send('application:replaceSelectedWordWithSuggestion', {
+      replacementText: e.label
+    });
+  }).on('application:nativeLookUp', function(){
+    mainWindow.showDefinitionForSelection();
   });
 
 });
@@ -215,6 +221,37 @@ ipc.on('client:ready', function(){
     channelName: args.channelName
   });
   contextMenu.menu.popup(mainWindow);
+
+}).on('client:showGenericTextContextMenu', function(e, args){
+  var templateJson = [];
+
+  if(args.isEditable){
+    if(typeof args.spellingSuggestions !== 'undefined'){
+      if(args.spellingSuggestions.length > 0){
+        _.each(args.spellingSuggestions, function(suggestion){
+          templateJson.push({ label: suggestion, command: 'application:replaceSelectedWordWithSuggestion' });
+        });
+      } else {
+        templateJson.push({ label: "No Guesses Found", enabled: false })
+      }
+      templateJson.push({ type: "separator" });
+    }
+  }
+
+  templateJson.push(
+    { label: "Cut", selector: "cut:", enabled: args.isEditable && args.isRange },
+    { label: "Copy", selector: "copy:", enabled: args.isRange },
+    { label: "Paste", selector: "paste:", enabled: args.isEditable },
+    { label: "Delete", selector: "delete:", enabled: args.isEditable && args.isRange },
+    { type: "separator" },
+    { label: "Select All", selector: "selectAll:" },
+    { type: "separator" },
+    { label: "Look Up in Dictionary", command: "application:nativeLookUp", enabled: args.isRange }
+  );
+
+  contextMenu.construct(templateJson);
+  contextMenu.menu.popup(mainWindow);
+
 });
 
 pool.on('irc:registering', function(e){

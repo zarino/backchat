@@ -36,7 +36,7 @@ module.exports = NativeMenu = (function(){
 
       if(item.command){
         item.click = function(){
-          self.emit(item.command);
+          self.emit(item.command, item);
         }
       }
 

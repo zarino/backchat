@@ -260,6 +260,14 @@ window.AppView = window.BackchatView.extend({
         channelName: window.activeChannel.options.channelName,
         updatedTimestamp: window.activeChannel.updatedTimestamp
       });
+    },
+    'application:replaceSelectedWordWithSuggestion': function(e){
+      var $input = $('textarea:focus, input:focus');
+      var textBeforeSelection = $input.val().substring(0, $input[0].selectionStart);
+      var textAfterSelection = $input.val().substring($input[0].selectionEnd);
+      var newCaretPosition = textBeforeSelection.length + e.replacementText.length;
+      $input.val(textBeforeSelection + e.replacementText + textAfterSelection);
+      $input[0].setSelectionRange(newCaretPosition, newCaretPosition);
     }
   },
 
@@ -587,6 +595,21 @@ window.ChannelView = window.BackchatView.extend({
           $input.val('');
         }
       }
+    },
+    'contextmenu .channel__input': function(){
+      var spellingSuggestions;
+      var selectedText = window.getSelection().toString();
+      var numberOfWords = selectedText.split(' ').length;
+      if(numberOfWords == 1){
+        if(spellchecker.isMisspelled(selectedText)){
+          spellingSuggestions = spellchecker.getCorrectionsForMisspelling(selectedText);
+        }
+      }
+      ipc.send('client:showGenericTextContextMenu', {
+        spellingSuggestions: spellingSuggestions,
+        isEditable: true,
+        isRange: selectedText.length > 0
+      });
     }
   },
 
