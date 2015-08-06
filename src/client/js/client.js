@@ -610,6 +610,13 @@ window.ChannelView = window.BackchatView.extend({
         isEditable: true,
         isRange: selectedText.length > 0
       });
+    },
+    'contextmenu .channel__scrollback': function(){
+      var selectedText = window.getSelection().toString();
+      ipc.send('client:showGenericTextContextMenu', {
+        isEditable: false,
+        isRange: selectedText.length > 0
+      });
     }
   },
 
