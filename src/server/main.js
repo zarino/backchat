@@ -11,12 +11,12 @@ var MenuItem = require('menu-item');
 var BrowserWindow = require('browser-window');
 
 var pkgJson = require('../package.json');
-var AppMenu = require('./app-menu');
+var NativeMenu = require('./native-menu');
 var ConnectionPool = require('./connection-pool');
 
 var mainWindow = null;
-var macMenu = null;
-var channelButtonMenu = null;
+var macMenu = new NativeMenu();
+var contextMenu = new NativeMenu();
 var pool = new ConnectionPool();
 
 var DEBUG = process.env.hasOwnProperty('BACKCHAT_DEBUG');
@@ -29,11 +29,8 @@ var loggingDirectory = path.join(app.getPath('userData'), 'Logs');
 
 app.on('ready', function() {
 
-  macMenu = new AppMenu({
-    templateJson: '../templates/mac-menu.json',
-    pkgJson: pkgJson
-  });
-  Menu.setApplicationMenu(macMenu.menu);
+  macMenu.construct(require('../templates/mac-menu.json'), pkgJson);
+  macMenu.setApplicationMenu();
 
   macMenu.on('application:quit', function(){
     app.quit();
@@ -70,24 +67,19 @@ app.on('ready', function() {
     shell.openExternal(url);
   });
 
-  channelButtonMenu = new AppMenu({
-    templateJson: '../templates/channel-menu.json',
-    pkgJson: pkgJson
-  });
-
-  channelButtonMenu.on('application:leaveChannel', function(){
-    pool.getConnection(this.serverUrl).part(this.channelName);
+  contextMenu.on('application:leaveChannel', function(){
+    pool.getConnection(this.context.serverUrl).part(this.context.channelName);
   }).on('application:joinChannel', function(){
-    pool.getConnection(this.serverUrl).join(this.channelName);
+    pool.getConnection(this.context.serverUrl).join(this.context.channelName);
   }).on('application:closeChannel', function(){
     mainWindow.webContents.send('channel:close', {
-      serverUrl: this.serverUrl,
-      channelName: this.channelName
+      serverUrl: this.context.serverUrl,
+      channelName: this.context.channelName
     });
   }).on('application:showLogsForChannel', function(){
     showLogsForChannel({
-      serverUrl: this.serverUrl,
-      channelName: this.channelName
+      serverUrl: this.context.serverUrl,
+      channelName: this.context.channelName
     });
   });
 
@@ -196,29 +188,28 @@ ipc.on('client:ready', function(){
   showLogsForChannel(args);
 
 }).on('client:showChannelButtonContextMenu', function(e, args){
-  // TODO: Change the menu items based on the type of channel. Eg:
-  // If it's a private message, option should be "Remove from sidebar".
-  // If it's a joined channel, option should be "Leave channel".
-  // If it's an unjoined channel, options should be "Join channel"
-  //   and "Remove from sidebar".
+  contextMenu.construct(require('../templates/channel-menu.json'),{
+    serverUrl: args.serverUrl,
+    channelName: args.channelName
+  });
+
   if(args.channelName.startsWith('#')){
     if(args.joined){
-      channelButtonMenu.set({ id: 'closeChannel'}, { visible: false });
-      channelButtonMenu.set({ id: 'joinChannel'}, { visible: false });
-      channelButtonMenu.set({ id: 'leaveChannel'}, { visible: true });
+      contextMenu.set({ id: 'closeChannel'}, { visible: false });
+      contextMenu.set({ id: 'joinChannel'}, { visible: false });
+      contextMenu.set({ id: 'leaveChannel'}, { visible: true });
     } else {
-      channelButtonMenu.set({ id: 'closeChannel'}, { visible: true });
-      channelButtonMenu.set({ id: 'joinChannel'}, { visible: true });
-      channelButtonMenu.set({ id: 'leaveChannel'}, { visible: false });
+      contextMenu.set({ id: 'closeChannel'}, { visible: true });
+      contextMenu.set({ id: 'joinChannel'}, { visible: true });
+      contextMenu.set({ id: 'leaveChannel'}, { visible: false });
     }
   } else {
-    channelButtonMenu.set({ id: 'closeChannel'}, { visible: true });
-    channelButtonMenu.set({ id: 'joinChannel'}, { visible: false });
-    channelButtonMenu.set({ id: 'leaveChannel'}, { visible: false });
+    contextMenu.set({ id: 'closeChannel'}, { visible: true });
+    contextMenu.set({ id: 'joinChannel'}, { visible: false });
+    contextMenu.set({ id: 'leaveChannel'}, { visible: false });
   }
-  channelButtonMenu.serverUrl = args.serverUrl;
-  channelButtonMenu.channelName = args.channelName;
-  channelButtonMenu.menu.popup(mainWindow);
+
+  contextMenu.menu.popup(mainWindow);
 });
 
 pool.on('irc:registering', function(e){
