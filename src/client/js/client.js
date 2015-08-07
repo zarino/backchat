@@ -49,7 +49,7 @@ var handleNotifications = function handleNotifications(event){
   var beep = false;
 
   // Test event properties, in order of importance
-  if(event.type == 'message' || event.type == 'action' || event.type == 'stageDirection'){
+  if(event.type == 'message' || event.type == 'action'){
     if(window.isBlurred || event.channel != window.activeChannel){
       incrementChannelBadge = true;
     }
