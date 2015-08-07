@@ -55,15 +55,30 @@ module.exports = NativeMenu = (function(){
     return this;
   };
 
-  // Find menu items with the given key:value attributes
+  // Find menu items with the given key:value attributes.
+  // Traverses down into submenus.
   NativeMenu.prototype.find = function(attributes){
-    return _.where(this.menu.items, attributes);
+    var items = [];
+
+    var findInMenu = function findInMenu(listOfMenuItems, attributes){
+      // Find matches at this level.
+      items = items.concat( _.where(listOfMenuItems, attributes) );
+      // Find submenus to try next.
+      _.each(listOfMenuItems, function(menuItem){
+        if(_.isObject(menuItem.submenu) && _.isArray(menuItem.submenu.items)){
+          findInMenu(menuItem.submenu.items, attributes);
+        }
+      });
+    };
+
+    findInMenu(this.menu.items, attributes);
+    return items;
   };
 
   // Find menu items by attribute, and then set other attributes on them.
   // eg: menu.set({ id: "exampleItem" }, { enabled: false });
-  NativeMenu.prototype.set = function(findByAtrributes, setAttributes){
-    _.each(this.find(findByAtrributes), function(menuItem){
+  NativeMenu.prototype.set = function(findByAttributes, setAttributes){
+    _.each(this.find(findByAttributes), function(menuItem){
       _.each(setAttributes, function(value, key){
         menuItem[key] = value;
       });
