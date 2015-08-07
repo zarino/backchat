@@ -187,16 +187,16 @@ module.exports = ConnectionPool = (function(){
       });
 
     }).addListener('channellist_start', function(){
-      console.log('[irc event]', '[channellist_start]');
+      // console.log('[irc event]', '[channellist_start]');
 
     }).addListener('channellist_item', function(){
-      console.log('[irc event]', '[channellist_item]');
+      // console.log('[irc event]', '[channellist_item]');
 
     }).addListener('channellist', function(){
-      console.log('[irc event]', '[channellist]');
+      // console.log('[irc event]', '[channellist]');
 
     }).addListener('raw', function(message){
-      console.log('[irc event]', '[raw]', message);
+      // console.log('[irc event]', '[raw]', message);
 
       if(message.command == 'rpl_whoreply'){
         self.emit('irc:userStatus', {
