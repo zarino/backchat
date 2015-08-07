@@ -254,13 +254,6 @@ window.AppView = window.BackchatView.extend({
       });
       this.keywords.push(e.newNick);
     },
-    'application:getActiveChannel': function(e){
-      ipc.send(e.ipcCallback, {
-        serverUrl: window.activeChannel.options.serverUrl,
-        channelName: window.activeChannel.options.channelName,
-        updatedTimestamp: window.activeChannel.updatedTimestamp
-      });
-    },
     'application:replaceSelectedWordWithSuggestion': function(e){
       var $input = $('textarea:focus, input:focus');
       var textBeforeSelection = $input.val().substring(0, $input[0].selectionStart);
@@ -671,6 +664,12 @@ window.ChannelView = window.BackchatView.extend({
     this.getChannelButtonView().clearNotifications();
 
     this.$('.channel__input').focus();
+
+    ipc.send('client:activeChannelChanged', {
+      serverUrl: this.options.serverUrl,
+      channelName: this.options.channelName,
+      isJoined: ! this.$el.is('.unjoined')
+    });
 
     window.activeChannel = this;
   },
