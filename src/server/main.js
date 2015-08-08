@@ -19,6 +19,8 @@ var macMenu = new NativeMenu();
 var contextMenu = new NativeMenu();
 var pool = new ConnectionPool();
 
+var activeChannel = {};
+
 var DEBUG = process.env.hasOwnProperty('BACKCHAT_DEBUG');
 
 if(DEBUG){
@@ -39,13 +41,17 @@ app.on('ready', function() {
   }).on('window:toggle-dev-tools', function(){
     BrowserWindow.getFocusedWindow().toggleDevTools();
   }).on('application:showLogsForCurrentChannel', function(){
-    mainWindow.webContents.send('application:getActiveChannel', {
-      ipcCallback: 'client:showLogsForChannel'
-    });
+    if('channelName' in activeChannel){
+      showLogsForChannel(activeChannel);
+    }
   }).on('application:leaveCurrentChannel', function(){
-    mainWindow.webContents.send('application:getActiveChannel', {
-      ipcCallback: 'client:leaveChannel'
-    });
+    if('channelName' in activeChannel){
+      pool.getConnection(activeChannel.serverUrl).part(activeChannel.channelName);
+    }
+  }).on('application:joinCurrentChannel', function(){
+    if('channelName' in activeChannel){
+      pool.getConnection(activeChannel.serverUrl).join(activeChannel.channelName);
+    }
   });
 
   mainWindow = new BrowserWindow({
@@ -165,6 +171,34 @@ ipc.on('client:ready', function(){
       args.toUserOrChannel,
       args.messageText
     );
+  }
+
+}).on('client:activeChannelChanged', function(e, args){
+  // Set activeChannel global variable.
+  activeChannel = args;
+
+  // Update the app menu.
+  macMenu.set({ command: "application:showLogsForCurrentChannel" }, { enabled: true });
+  if(activeChannel.channelName.startsWith('#')){
+    if(activeChannel.isJoined){
+      macMenu.set({ id: "leaveOrJoinCurrentChannel" }, {
+        enabled: true,
+        label: "Leave channel",
+        command: "application:leaveCurrentChannel"
+      });
+    } else {
+      macMenu.set({ id: "leaveOrJoinCurrentChannel" }, {
+        enabled: true,
+        label: "Join channel",
+        command: "application:joinCurrentChannel"
+      });
+    }
+  } else {
+    macMenu.set({ id: "leaveOrJoinCurrentChannel" }, {
+      enabled: false,
+      label: "Leave channel",
+      command: "application:leaveCurrentChannel"
+    });
   }
 
 }).on('client:leaveChannel', function(e, args){
