@@ -40,6 +40,11 @@ module.exports = ConnectionPool = (function(){
         message: message
       });
 
+      // Register with NickServ if a password is available.
+      if("nickPassword" in connectionSettings){
+        client.say('NickServ', 'identify ' + connectionSettings.nickPassword);
+      }
+
       // Join channels from config file if requested
       if(connectionSettings.autoConnect && connectionSettings.channels){
         _.each(connectionSettings.channels, function(channelName){
@@ -136,6 +141,12 @@ module.exports = ConnectionPool = (function(){
 
     }).addListener('selfMessage', function(to, text){
       // console.log('[irc event]', '[selfMessage]', to, text);
+
+      // Ignore messages sent to NickServ.
+      if(to == "NickServ"){
+        return true;
+      }
+
       self.emit('irc:message', {
         server: connectionSettings.url,
         fromUser: client.nick,
