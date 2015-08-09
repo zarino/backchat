@@ -27,6 +27,7 @@ module.exports = ConnectionPool = (function(){
       connectionSettings.nick,
       {
         port: connectionSettings.port,
+        secure: connectionSettings.secure || false,
         userName: connectionSettings.userName,
         realName: connectionSettings.realName,
         autoConnect: connectionSettings.autoConnect
