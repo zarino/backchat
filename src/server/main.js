@@ -112,6 +112,8 @@ ipc.on('client:ready', function(){
 }).on('client:sendMessage', function(e, args){
   console.log('client:sendMessage', JSON.stringify(args, null, 2));
 
+  var connection = pool.getConnection(args.serverUrl);
+
   // User wants to send an IRC command like /me, /away, or /whois
   if(args.messageText.startsWith('/')){
     var messageWords = args.messageText.split(' ');
@@ -120,7 +122,7 @@ ipc.on('client:ready', function(){
 
     // ME <actionMessage>
     if (messageCommand == '/me'){
-      pool.getConnection(args.serverUrl).action(
+      connection.action(
         args.toUserOrChannel,
         messageWithoutFirstWord
       );
@@ -128,46 +130,42 @@ ipc.on('client:ready', function(){
     // AWAY and AWAY <awayMessage>
     } else if(messageCommand == '/away'){
       if(messageWords.length == 1){
-        pool.getConnection(args.serverUrl).send('AWAY');
+        connection.send('AWAY');
       } else {
-        pool.getConnection(args.serverUrl).send('AWAY', messageWithoutFirstWord);
+        connection.send('AWAY', messageWithoutFirstWord);
       }
 
     // MSG <message> and QUERY <message>
     } else if(messageCommand == '/msg' || messageCommand == '/query'){
-      pool.getConnection(args.serverUrl).say(
+      connection.say(
         args.toUserOrChannel,
         messageWithoutFirstWord
       );
 
-    // JOIN <channelName>
-    } else if(messageCommand == '/join'){
-      pool.getConnection(args.serverUrl).join(messageWithoutFirstWord);
-
     // PART <optional:channelName>
     } else if(messageCommand == '/part'){
       if(messageWithoutFirstWord.startsWith('#')){
-        pool.getConnection(args.serverUrl).part(messageWithoutFirstWord);
+        connection.part(messageWithoutFirstWord);
       } else {
-        pool.getConnection(args.serverUrl).part(args.toUserOrChannel);
+        connection.part(args.toUserOrChannel);
       }
 
     // QUIT
     } else if(messageCommand == '/quit'){
-      pool.getConnection(args.serverUrl).disconnect();
+      connection.disconnect();
 
-    // Something else, just try your best
+    // Something else, like /JOIN. Just try your best.
     } else {
       var ircCommand = messageCommand.replace('/', '').toUpperCase();
-      pool.getConnection(args.serverUrl).send(
-        ircCommand,
-        messageWithoutFirstWord
+      connection.send.apply(
+        connection,
+        [ircCommand].concat(messageWithoutFirstWord.split(' '))
       );
     }
 
-  // No slash, so it must be just a normal message
+  // No slash, so it must be just a normal message.
   } else {
-    pool.getConnection(args.serverUrl).say(
+    connection.say(
       args.toUserOrChannel,
       args.messageText
     );
@@ -370,7 +368,7 @@ pool.on('irc:registering', function(e){
   mainWindow.webContents.send('server:whois', e);
 
 }).on('irc:userStatus', function(e){
-  console.log('user:userStatus', JSON.stringify(e, null, 2));
+  // console.log('user:userStatus', JSON.stringify(e, null, 2));
   mainWindow.webContents.send('user:userStatus', e);
 
 });
