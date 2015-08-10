@@ -7,8 +7,11 @@
       "nick": "backchat",
       "userName": "backchat",
       "realName": "Backchat",
-      "autoConnect": true,
-      "channels": [ "#channel1" ]
+      "channels": [
+        {
+          "name": "#channel1"
+        }
+      ]
     }
   ]
 }

@@ -187,9 +187,9 @@ window.AppView = window.BackchatView.extend({
       var self = this;
       _.each(settings.servers, function(server){
         self.addServerButton(server.url, { disconnected: true });
-        _.each(server.channels, function(channelName){
-          self.addChannelButton(server.url, channelName, { unjoined: true });
-          self.addChannelView(server.url, channelName);
+        _.each(server.channels, function(channel){
+          self.addChannelButton(server.url, channel.name, { unjoined: true });
+          self.addChannelView(server.url, channel.name, { unjoined: true });
         });
       });
       // Add the user's specified keywords
@@ -269,18 +269,22 @@ window.AppView = window.BackchatView.extend({
   channelButtonViews: {}, // Keyed by serverUrl+channelName
   keywords: [], // Words that should trigger a notification
 
-  addChannelView: function(serverUrl, channelName){
+  addChannelView: function(serverUrl, channelName, extraOptions){
     var id = serverUrl + ' ' + channelName;
 
     if(id in this.channelViews){
       return this.channelViews[id];
     }
 
-    var channelView = new window.ChannelView({
+    var options = _.extend({
       serverUrl: serverUrl,
       channelName: channelName
-    });
-    channelView.render().appendTo(this.$('.app-content'));
+    }, extraOptions);
+
+    var channelView = new window.ChannelView(options);
+    channelView.render().appendTo(
+      this.$('.app-content')
+    );
     this.channelViews[id] = channelView;
     return channelView;
   },
@@ -504,6 +508,11 @@ window.ChannelView = window.BackchatView.extend({
     this.$el.html(
       renderTemplate('channel')
     );
+
+    if(this.options.unjoined == true){
+      this.leave();
+    }
+
     return this.$el;
   },
 

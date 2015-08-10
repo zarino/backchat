@@ -7,8 +7,15 @@
       "nick": "nodebot122",
       "userName": "nodebot122",
       "realName": "Node Bot 122",
-      "autoConnect": true,
-      "channels": [ "#bots" ]
+      "channels": [
+        {
+          "name": "#bots",
+          "autoJoin": false
+        },
+        {
+          "name": "#poplus"
+        }
+      ]
     }
   ],
   "keywords": [ "tannoy" ]

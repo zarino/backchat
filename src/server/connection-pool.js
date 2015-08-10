@@ -16,12 +16,6 @@ module.exports = ConnectionPool = (function(){
   ConnectionPool.prototype.addConnection = function(connectionSettings){
     var self = this;
 
-    if(connectionSettings.autoConnect){
-      self.emit('irc:registering', {
-        server: connectionSettings.url
-      });
-    }
-
     var client = new irc.Client(
       connectionSettings.url,
       connectionSettings.nick,
@@ -30,9 +24,18 @@ module.exports = ConnectionPool = (function(){
         secure: connectionSettings.secure || false,
         userName: connectionSettings.userName,
         realName: connectionSettings.realName,
-        autoConnect: connectionSettings.autoConnect
+        autoConnect: false
       }
     );
+
+    // Connect to the server, unless config
+    // specifies "autoConnect: false".
+    if(typeof connectionSettings.autoConnect == 'undefined' || connectionSettings.autoConnect == true){
+      client.connect();
+      self.emit('irc:registering', {
+        server: connectionSettings.url
+      });
+    }
 
     client.addListener('registered', function(message){
       // console.log('[irc event]', '[registered]', message);
@@ -46,16 +49,23 @@ module.exports = ConnectionPool = (function(){
         client.say('NickServ', 'identify ' + connectionSettings.nickPassword);
       }
 
-      // Join channels from config file if requested
-      if(connectionSettings.autoConnect && connectionSettings.channels){
-        _.each(connectionSettings.channels, function(channelName){
-          client.join(channelName);
+      // Join channels from config file,
+      // unless they are set to "autoJoin: false".
+      _.each(connectionSettings.channels, function(channel){
+        if( typeof channel.autoJoin == 'undefined' || channel.autoJoin == true ){
+          // The default node-irc .join() method doesn't support joining
+          // channels with passwords. So we send a raw server command instead.
+          // The password is optional, and if it's undefined, _.compact()
+          // squishes it out. Then we apply the arguments individually.
+          var args = _.compact(['JOIN', channel.name, channel.password]);
+          client.send.apply(client, args);
+
           self.emit('irc:joining', {
             server: connectionSettings.url,
-            channel: channelName
+            channel: channel.name
           });
-        });
-      }
+        }
+      });
 
       // Start the function that checks for user away statuses
       refreshUserStatuses();
