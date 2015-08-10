@@ -50,7 +50,7 @@ app.on('ready', function() {
     }
   }).on('application:joinCurrentChannel', function(){
     if('channelName' in activeChannel){
-      pool.getConnection(activeChannel.serverUrl).join(activeChannel.channelName);
+      pool.getConnection(activeChannel.serverUrl).joinChannel(activeChannel.channelName);
     }
   });
 
@@ -76,7 +76,7 @@ app.on('ready', function() {
   contextMenu.on('application:leaveChannel', function(){
     pool.getConnection(this.context.serverUrl).part(this.context.channelName);
   }).on('application:joinChannel', function(){
-    pool.getConnection(this.context.serverUrl).join(this.context.channelName);
+    pool.getConnection(this.context.serverUrl).joinChannel(this.context.channelName);
   }).on('application:closeChannel', function(){
     mainWindow.webContents.send('channel:close', {
       serverUrl: this.context.serverUrl,
@@ -142,6 +142,12 @@ ipc.on('client:ready', function(){
         messageWithoutFirstWord
       );
 
+    // JOIN <channelName> <optional:channelPassword>
+    // Note we only support this very limited subset of the /JOIN command spec!
+    // Commands like `/JOIN #chan1,#chan2 pass1,pass2` won't work.
+    } else if(messageCommand == '/join'){
+      connection.joinChannel(messageWords[1], messageWords[2]);
+
     // PART <optional:channelName>
     } else if(messageCommand == '/part'){
       if(messageWithoutFirstWord.startsWith('#')){
@@ -154,12 +160,12 @@ ipc.on('client:ready', function(){
     } else if(messageCommand == '/quit'){
       connection.disconnect();
 
-    // Something else, like /JOIN. Just try your best.
+    // Something else, just try your best
     } else {
       var ircCommand = messageCommand.replace('/', '').toUpperCase();
-      connection.send.apply(
-        connection,
-        [ircCommand].concat(messageWithoutFirstWord.split(' '))
+      connection.send(
+        ircCommand,
+        messageWithoutFirstWord
       );
     }
 

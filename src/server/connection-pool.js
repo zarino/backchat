@@ -28,6 +28,36 @@ module.exports = ConnectionPool = (function(){
       }
     );
 
+    // Save channel passwords for later use when re-connecting
+    // to channels that have been left.
+    client.channelPasswords = {};
+    _.each(connectionSettings.channels, function(channel){
+      if('password' in channel){
+        client.channelPasswords[channel.name] = channel.password;
+      }
+    });
+
+    // Monkeypatch a better .join() method onto the instance,
+    // which a) allows joining of channels with passwords,
+    // b) pulls passwords from storage if not supplied, and
+    // c) adds new passwords to storage.
+    client.joinChannel = function(channelName, channelPassword){
+
+      if(typeof channelPassword !== 'undefined'){
+        // A password has been supplied, so save it, and use it.
+        client.channelPasswords[channelName] = channelPassword;
+        client.send('JOIN', channelName, channelPassword);
+
+      } else if(channelName in client.channelPasswords) {
+        // No password, but we already know this channel's password.
+        client.send('JOIN', channelName, client.channelPasswords[channelName]);
+
+      } else {
+        // No password. Just try joining.
+        client.join(channelName);
+      }
+    };
+
     // Connect to the server, unless config
     // specifies "autoConnect: false".
     if(typeof connectionSettings.autoConnect == 'undefined' || connectionSettings.autoConnect == true){
@@ -53,12 +83,7 @@ module.exports = ConnectionPool = (function(){
       // unless they are set to "autoJoin: false".
       _.each(connectionSettings.channels, function(channel){
         if( typeof channel.autoJoin == 'undefined' || channel.autoJoin == true ){
-          // The default node-irc .join() method doesn't support joining
-          // channels with passwords. So we send a raw server command instead.
-          // The password is optional, and if it's undefined, _.compact()
-          // squishes it out. Then we apply the arguments individually.
-          var args = _.compact(['JOIN', channel.name, channel.password]);
-          client.send.apply(client, args);
+          client.joinChannel(channel.name, channel.password);
 
           self.emit('irc:joining', {
             server: connectionSettings.url,
