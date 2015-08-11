@@ -239,7 +239,12 @@ window.AppView = window.BackchatView.extend({
       this.addServerButton(e.server);
       this.addChannelButton(e.server, e.channel);
       this.addChannelView(e.server, e.channel)
-        .addStageDirection({ topic: e.topic, timestamp: e.timestamp });
+        .addStageDirection({
+          topic: e.topic,
+          timestamp: e.timestamp,
+          setByNick: e.setByNick,
+          setAt: e.setAt
+        });
     },
     'server:whois': function(e){
       window.activeChannel.addServerMessage(
@@ -835,14 +840,17 @@ window.ChannelView = window.BackchatView.extend({
   addStageDirection: function(options){
     if('topic' in options){
       var subject = 'Topic is:';
-      var messageText = options.topic;
+      var messageText = options.topic + ' (Set ' + options.setAt + ' by ' + options.setByNick + ')';
+
     } else if('userJoined' in options){
       var subject = options.userJoined;
       var messageText = 'joined the channel';
+
     } else if('userParted' in options){
       var subject = options.userParted;
       var messageText = 'left the channel';
     }
+
     var $newElement = $('<p>')
       .addClass('channel__stage-direction')
       .html(renderTemplate('message', {

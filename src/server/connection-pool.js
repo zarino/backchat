@@ -105,13 +105,14 @@ module.exports = ConnectionPool = (function(){
         })
       });
 
-    }).addListener('topic', function(channel, topic, nick, message){
+    }).addListener('topic', function(channel, topic, user, message){
       // console.log('[irc event]', '[topic]', channel, topic, nick);
       self.emit('irc:topic', {
         server: connectionSettings.url,
         channel: channel,
         topic: topic,
-        user: nick
+        setByNick: user.split('!')[0],
+        setAtTimestamp: message.args[3]
       });
 
     }).addListener('join', function(channel, nick, message){

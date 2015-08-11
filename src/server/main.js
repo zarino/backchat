@@ -318,8 +318,10 @@ pool.on('irc:registering', function(e){
   console.log('channel:parted', JSON.stringify(e, null, 2));
   mainWindow.webContents.send('channel:parted', e);
   saveToLog('channel:parted', e);
+
 }).on('irc:topic', function(e){
   e.timestamp = ISOTimestamp();
+  e.setAt = roughTime(e.setAtTimestamp);
   console.log('channel:topicChanged', JSON.stringify(e, null, 2));
   mainWindow.webContents.send('channel:topicChanged', e);
   saveToLog('channel:topicChanged', e);
@@ -406,11 +408,25 @@ var ISOTimestamp = function ISOTimestamp(){
   return new Date().toISOString();
 }
 
+// Returns a time string (eg 14:00:00) if unixTimestamp is sometime today,
+// otherwise returns a date string (eg 11/08/2015)
+var roughTime = function roughTime(unixTimestamp){
+  var d = new Date(unixTimestamp * 1000);
+  var now = new Date();
+  var startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()) / 1000;
+
+  if(unixTimestamp > startOfToday){
+    return d.toLocaleTimeString(undefined, {hour12: false});
+  } else {
+    return d.toLocaleDateString('en-GB');
+  }
+}
+
 var saveToLog = function saveToLog(type, e){
   var row = '[' + e.timestamp + '] ';
 
   if(type == 'channel:topicChanged'){
-    row += 'Topic is: ' + e.topic;
+    row += 'Topic is: ' + e.topic + ' (Set ' + e.setAt + ' by ' + e.setByNick + ')';
     var channel = e.channel;
   } else if(type == 'channel:usersListed') {
     row += 'Users: ' + e.users.join(', ');
