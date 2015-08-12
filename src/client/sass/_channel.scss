@@ -169,3 +169,35 @@ hr.bookmark {
     padding-bottom: $padding-scrollback-item;
   }
 }
+
+.channel__banners {
+  -webkit-user-select: none;
+  cursor: default;
+}
+
+.banner {
+  display: none;
+  font-size: 0.9em;
+  padding: 0.5em 1em;
+  background: $color-mac-banner-background;
+  border-bottom: 1px solid $color-mac-banner-border;
+  color: $color-mac-banner-text;
+  font-weight: bold;
+}
+
+.banner--i-am-away,
+.banner--they-are-away {
+  background: $color-mac-warning-background;
+  border-bottom: 1px solid $color-mac-warning-border;
+  color: $color-mac-warning-text;
+
+  &:before {
+    content: "";
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background-color: mix($color-mac-warning-text, red, 80%);
+    border-radius: 8px;
+    margin-right: 0.5em;
+  }
+}

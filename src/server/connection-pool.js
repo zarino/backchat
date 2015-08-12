@@ -231,7 +231,8 @@ module.exports = ConnectionPool = (function(){
       self.emit('irc:userStatus', {
         server: connectionSettings.url,
         nick: info.nick,
-        away: ('away' in info)
+        away: ('away' in info),
+        myNick: client.nick
       });
 
     }).addListener('channellist_start', function(){
@@ -250,19 +251,22 @@ module.exports = ConnectionPool = (function(){
         self.emit('irc:userStatus', {
           server: connectionSettings.url,
           nick: message.args[5],
-          away: message.args[6].startsWith('G')
+          away: message.args[6].startsWith('G'),
+          myNick: client.nick
         });
       } else if(message.command == 'rpl_nowaway'){
         self.emit('irc:userStatus', {
           server: connectionSettings.url,
           nick: message.args[0],
-          away: true
+          away: true,
+          myNick: client.nick
         });
       } else if(message.command == 'rpl_unaway'){
         self.emit('irc:userStatus', {
           server: connectionSettings.url,
           nick: message.args[0],
-          away: false
+          away: false,
+          myNick: client.nick
         });
       }
     });

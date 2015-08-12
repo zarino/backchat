@@ -39,19 +39,12 @@
       color: #fff;
     }
 
-    &.unjoined {
+    &.unjoined,
+    &.away {
       color: mix($color-mac-sidebar-heading, $color-mac-sidebar-background, 50%);
 
-      &.active:focus {
+      &.active {
         color: rgba(255,255,255,0.5);
-      }
-    }
-
-    &.away {
-      color: inherit;
-
-      &.active:focus {
-        color: rgba(255,255,255,0.7);
       }
     }
   }

@@ -157,7 +157,7 @@ window.BackchatView = Backbone.View.extend({
     var self = this;
     // Allow render() methods etc to access
     // all options specified at view creation.
-    self.options = options;
+    self.options = _.defaults(options, self.defaultOptions);
 
     // We replicate the built-in Backbone Event listener,
     // but for IPC events. Note how we use .bind() to create
@@ -188,8 +188,8 @@ window.AppView = window.BackchatView.extend({
       _.each(settings.servers, function(server){
         self.addServerButton(server.url, { disconnected: true });
         _.each(server.channels, function(channel){
-          self.addChannelButton(server.url, channel.name, { unjoined: true });
-          self.addChannelView(server.url, channel.name, { unjoined: true });
+          self.addChannelButton(server.url, channel.name, { state: 'unjoined' });
+          self.addChannelView(server.url, channel.name, { state: 'unjoined' });
         });
       });
       // Add the user's specified keywords
@@ -366,14 +366,17 @@ window.ServerButtonView = window.BackchatView.extend({
 window.ChannelButtonView = window.BackchatView.extend({
   tagName: 'button',
 
+  defaultOptions: {
+    state: 'joined',
+    away: false
+  },
+
   render: function(){
     var id = this.options.serverUrl + ' ' + this.options.channelName;
     this.$el.text(this.options.channelName);
     this.$el.attr('data-id', id);
     this.$el.append('<div class="button-badges">');
-    if(this.options.unjoined){
-      this.$el.addClass('unjoined');
-    }
+    this.refresh();
     return this.$el;
   },
 
@@ -386,7 +389,7 @@ window.ChannelButtonView = window.BackchatView.extend({
       ipc.send('client:showChannelButtonContextMenu', {
         serverUrl: this.options.serverUrl,
         channelName: this.options.channelName,
-        joined: ! this.$el.is('.unjoined')
+        joined: this.options.state == 'joined'
       });
     }
   },
@@ -408,29 +411,46 @@ window.ChannelButtonView = window.BackchatView.extend({
   ipcEvents: {
     'channel:joining': function(e){
       if(this.isRightChannel(e) && this.isAboutMe(e)){
-        this.$el.addClass('loading');
+        this.options.state = 'loading';
+        this.refresh();
       }
     },
     'channel:joined': function(e){
       if(this.isRightChannel(e) && this.isAboutMe(e)){
-        this.$el.removeClass('loading unjoined');
+        this.options.state = 'joined';
+        this.refresh();
       }
     },
     'channel:parted': function(e){
       if(this.isRightChannel(e) && this.isAboutMe(e)){
-        this.$el.addClass('unjoined');
+        this.options.state = 'unjoined';
+        this.refresh();
       }
     },
     'user:userStatus': function(details){
       if(details.server == this.options.serverUrl) {
         if(details.nick == this.options.channelName){
-          if(details.away == true) {
-            this.$el.addClass('away');
-          } else if(details.away == false){
-            this.$el.removeClass('away');
-          }
+          this.options.away = details.away;
+          this.refresh();
         }
       }
+    }
+  },
+
+  refresh: function(){
+    if(this.options.away){
+      this.$el.addClass('away');
+    } else {
+      this.$el.removeClass('away');
+    }
+    if(this.options.state == 'unjoined'){
+      this.$el.addClass('unjoined');
+    }
+    if(this.options.state == 'loading'){
+      this.$el.addClass('loading');
+    }
+    if(this.options.state == 'joined'){
+      this.$el.removeClass('loading unjoined');
     }
   },
 
@@ -468,16 +488,26 @@ window.ChannelButtonView = window.BackchatView.extend({
 window.UserButtonView = window.BackchatView.extend({
   tagName: 'button',
 
+  defaultOptions: {
+    away: false
+  },
+
   render: function(){
-    this.$el.text(this.options.nick);
+    this.refresh();
     return this.$el;
   },
 
   events: {
     'dblclick': function(){
       window.app.addServerButton(this.options.serverUrl);
-      window.app.addChannelButton(this.options.serverUrl, this.options.nick);
-      var v = window.app.addChannelView(this.options.serverUrl, this.options.nick);
+      window.app.addChannelButton(this.options.serverUrl, this.options.nick, {
+        away: this.options.away,
+        state: 'joined'
+      });
+      var v = window.app.addChannelView(this.options.serverUrl, this.options.nick, {
+        away: this.options.away,
+        state: 'joined'
+      });
       v.focus();
     }
   },
@@ -487,20 +517,26 @@ window.UserButtonView = window.BackchatView.extend({
       if(details.server == this.options.serverUrl) {
         if(details.oldNick == this.options.nick){
           this.options.nick = details.newNick;
-          this.$el.text(details.newNick);
+          this.refresh();
         }
       }
     },
     'user:userStatus': function(details){
       if(details.server == this.options.serverUrl) {
         if(details.nick == this.options.nick){
-          if(details.away == true) {
-            this.$el.addClass('away');
-          } else if(details.away == false){
-            this.$el.removeClass('away');
-          }
+          this.options.away = details.away;
+          this.refresh();
         }
       }
+    }
+  },
+
+  refresh: function(){
+    this.$el.text(this.options.nick);
+    if(this.options.away){
+      this.$el.addClass('away');
+    } else {
+      this.$el.removeClass('away');
     }
   }
 });
@@ -509,15 +545,17 @@ window.UserButtonView = window.BackchatView.extend({
 window.ChannelView = window.BackchatView.extend({
   className: "channel",
 
+  defaultOptions: {
+    state: 'joined',
+    away: false
+  },
+
   render: function(){
     this.$el.html(
       renderTemplate('channel')
     );
 
-    if(this.options.unjoined == true){
-      this.leave();
-    }
-
+    this.refresh();
     return this.$el;
   },
 
@@ -630,17 +668,38 @@ window.ChannelView = window.BackchatView.extend({
   ipcEvents: {
     'channel:parted': function(e){
       if(this.isRightChannel(e) && this.isAboutMe(e)){
-        this.leave();
+        this.options.state = 'unjoined';
+        this.refresh();
       }
     },
     'channel:joined': function(e){
       if(this.isRightChannel(e) && this.isAboutMe(e)){
-        this.join();
+        this.options.state = 'joined';
+        this.refresh();
       }
     },
     'channel:close': function(e){
       if(this.isRightChannel(e)){
         this.close();
+      }
+    },
+    'user:nickChanged': function(details){
+      if(details.server == this.options.serverUrl) {
+        if(details.oldNick == this.options.channelName){
+          this.options.channelName = details.newNick;
+        }
+      }
+    },
+    'user:userStatus': function(details){
+      if(details.server == this.options.serverUrl) {
+        if(details.nick == details.myNick){
+          // This is my away status
+          this.iAmAway(details.away);
+        } else if(details.nick == this.options.channelName) {
+          // This is the away status for the other person in the private chat
+          this.options.away = details.away;
+          this.refresh();
+        }
       }
     }
   },
@@ -682,21 +741,38 @@ window.ChannelView = window.BackchatView.extend({
     ipc.send('client:activeChannelChanged', {
       serverUrl: this.options.serverUrl,
       channelName: this.options.channelName,
-      isJoined: ! this.$el.is('.unjoined')
+      isJoined: this.options.state == 'joined'
     });
 
     window.activeChannel = this;
   },
 
-  join: function(){
-    this.$el.removeClass('unjoined');
-    this.$('.channel__input').prop('disabled', false);
+  refresh: function(){
+    if(this.options.state == 'joined'){
+      this.$el.removeClass('unjoined');
+      this.$('.channel__input').prop('disabled', false);
+    } else {
+      this.removeUserButtons();
+      this.$el.addClass('unjoined');
+      this.$('.channel__input').prop('disabled', true);
+    }
+
+    // Ideally we should show/hide .banner--i-am-away here,
+    // but we don't know whether the user is away or not.
+
+    if(this.options.away){
+      this.$('.banner--they-are-away').show().children('.nick').text(this.options.channelName);
+    } else {
+      this.$('.banner--they-are-away').hide().children('.nick').text('This user');
+    }
   },
 
-  leave: function(){
-    this.removeUserButtons();
-    this.$el.addClass('unjoined');
-    this.$('.channel__input').prop('disabled', true);
+  iAmAway: function(isAway){
+    if(isAway && this.options.state == 'joined'){
+      this.$('.banner--i-am-away').show();
+    } else {
+      this.$('.banner--i-am-away').hide();
+    }
   },
 
   close: function(){
@@ -748,7 +824,8 @@ window.ChannelView = window.BackchatView.extend({
     var userButtonView = new window.UserButtonView({
       serverUrl: this.options.serverUrl,
       channelName: this.options.channelName,
-      nick: nick
+      nick: nick,
+      away: false
     });
     userButtonView.render().appendTo(
       this.$('.channel__users')
